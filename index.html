@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Baking Scaler</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDF0F2;--ink:#14212B;--card:#fff;--muted:#5B6B77;--line:#D3DADF;--accent:#E9B824;--aink:#14212B;--blue:#2F3F86;--err:#B3261E;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F171D;--ink:#E9EEF1;--card:#18242D;--muted:#93A3AE;--line:#2A3A45;--accent:#F0C443;--blue:#8C9BE8;--err:#FF9187}}
+:root[data-theme="dark"]{--bg:#0F171D;--ink:#E9EEF1;--card:#18242D;--muted:#93A3AE;--line:#2A3A45;--accent:#F0C443;--blue:#8C9BE8;--err:#FF9187}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+h1{font:800 30px/1.1 Archivo,system-ui,sans-serif;margin:8px 0 12px}
+select{width:100%;font:800 18px/1.2 Archivo,system-ui,sans-serif;padding:12px;border-radius:12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);margin-bottom:8px}
+.badge{display:inline-block;font-size:13px;border:1px solid var(--blue);color:var(--blue);border-radius:99px;padding:2px 10px;margin-top:2px}
+.hero{background:var(--accent);color:var(--aink);border-radius:18px;padding:16px;margin:16px 0 12px}
+.hero label,.card label{font-weight:500;display:block}
+#count{width:100%;font:800 64px/1.1 Archivo,system-ui,sans-serif;background:transparent;border:0;border-bottom:3px solid var(--aink);color:var(--aink);padding:4px 0;outline:none;border-radius:0}
+#count::placeholder{color:rgba(20,33,43,.35)}
+.rangehint{font-size:13px;color:rgba(20,33,43,.65);margin-top:4px}
+.err{color:var(--err);font-weight:500;font-size:14px;margin-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chips button{font:inherit;font-size:15px;padding:8px 14px;border-radius:99px;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--aink);color:var(--accent)}
+.chips button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.card h2{font:800 20px/1.2 Archivo,system-ui,sans-serif;margin:0 0 10px}
+#elev{width:100%;font:800 28px/1.2 Archivo,system-ui,sans-serif;background:transparent;border:0;border-bottom:2px solid var(--line);color:var(--ink);padding:4px 0;margin-top:2px;border-radius:0}
+.card .chips button{color:var(--blue)}
+table{width:100%;border-collapse:collapse}
+td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.g{text-align:right;font-weight:800;padding-left:8px;white-space:nowrap}
+td.v{text-align:right;color:var(--muted);padding-left:8px;font-size:14px}
+tr.sec td{font:800 16px Archivo,system-ui,sans-serif;padding-top:16px;color:var(--blue)}
+.chg{color:var(--blue);font-size:13px}
+.approx{color:var(--accent);filter:brightness(.6)}
+:root[data-theme="dark"] .approx,@media (prefers-color-scheme:dark){.approx{filter:none;color:var(--accent)}}
+ul,ol{margin:6px 0 0;padding-left:22px}
+li{margin:5px 0}
+.note{color:var(--muted);font-size:14px;margin:10px 0 0}
+.warn{border-left:4px solid var(--accent);padding-left:10px}
+summary{cursor:pointer;font-weight:500}
+.mini{width:auto;display:inline-block;min-width:90px}
+.row2{display:flex;gap:10px;align-items:flex-end}
+.row2>div{flex:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>Baking scaler</h1>
+<select id="rs" aria-label="Choose a recipe"></select>
+<span class="badge" id="badge"></span>
+
+<section class="hero" id="qtySection">
+<label for="count" id="clabel">How many?</label>
+<input id="count" type="text" enterkeyhint="done" autocomplete="off">
+<div class="rangehint" id="rangehint"></div>
+<div class="err" id="counterr" role="alert"></div>
+<div class="chips" id="cchips"></div>
+</section>
+
+<section class="hero" id="pizzaSection" style="display:none">
+<label for="pstyle">Pizza style</label>
+<div class="chips" id="pstylechips"></div>
+<label for="psize" style="margin-top:14px" id="psizelabel">Size</label>
+<div class="chips" id="pchips"></div>
+<label for="pcount" style="margin-top:14px" id="pcountlabel">How many?</label>
+<input id="pcount" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off">
+<div class="err" id="pcounterr" role="alert"></div>
+</section>
+
+<section class="hero" id="breadSection" style="display:none">
+<div class="chips" id="bmodechips"></div>
+<div id="bmode-loaves">
+<label for="bcount" id="bcountlabel" style="margin-top:12px">How many loaves?</label>
+<input id="bcount" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off">
+<div class="chips" id="bcchips"></div>
+</div>
+<div id="bmode-weight" style="display:none">
+<label for="bweight" style="margin-top:12px">Target dough weight (g)</label>
+<input id="bweight" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off">
+</div>
+<div class="err" id="bcounterr" role="alert"></div>
+</section>
+
+<section class="card" id="tempSection" style="display:none">
+<label for="ktemp">Kitchen temperature (°F)</label>
+<input id="ktemp" type="text" inputmode="numeric" autocomplete="off" placeholder="70">
+<div class="chips" id="tchips"></div>
+<p class="note" style="margin-top:8px">This only shifts the fermentation-time estimate below — it's a rough rule of thumb (fermentation roughly doubles for every 17°F drop), not a lab measurement.</p>
+</section>
+
+<section class="hero" id="chefPizzaSection" style="display:none">
+<label for="cpcount" id="cpcountlabel">How many pizzas?</label>
+<input id="cpcount" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off">
+<div class="err" id="cpcounterr" role="alert"></div>
+</section>
+
+<section class="card" id="elevSection">
+<label for="elev">Your elevation in feet</label>
+<input id="elev" type="text" inputmode="numeric" autocomplete="off" placeholder="0">
+<div class="chips" id="echips"></div>
+</section>
+
+<div id="out"></div>
+
+<details class="card">
+<summary>How to measure odd amounts</summary>
+<p class="note">Grams (bold) are the accurate number — a kitchen scale removes all guesswork. The lighter number next to it is the closest practical spoon or cup combo.</p>
+<p class="note">Standard spoons only come in ⅛, ¼, ½, and 1 tsp (and ½, 1 tbsp). An amount like ⅜ tsp isn't a single spoon — it's ¼ tsp <b>plus</b> ⅛ tsp, added together. This app writes it that way instead of showing a fraction you can't actually measure. Amounts marked <span class="approx">●</span> are close approximations — weigh them if it matters.</p>
+<p class="note">No ⅛ tsp spoon? Fill a ¼ tsp about halfway, or use a rounded pinch between two fingers — about ⅛ tsp. For a true dash under that, it's a light pinch.</p>
+</details>
+
+<details class="card">
+<summary>Where these numbers come from</summary>
+<p class="note">Buttermilk biscuits, the Paula Deen-style variant, blueberry biscuits, corn tortillas, egg noodles, and basic egg pasta were cross-checked against several published recipes; where sources disagreed, I used a middle value. All three pizza doughs use standard baker's-percentage ranges checked against multiple sources: New York style around 62% water/2% salt/2% oil/0.5% yeast; Neapolitan around 60% water/3% salt/no oil/very little yeast, per the official AVPN ratios; Detroit style around 75% water/2% salt/2% oil, no-knead. Dough-ball and pan weights are typical, not exact. Cornbread, pancakes, flour tortillas, pie crust, and sausage gravy use standard ratios but haven't been cross-checked against multiple sources yet.</p>
+<p class="note">Baking powder/soda cuts at altitude follow Utah State University Extension. Extra liquid and oven bumps follow Betty Crocker and Cook's Country guidance for quick breads. These only apply to true quick breads (biscuits, cornbread, pancakes) — not yeast dough, pasta, tortillas, noodles, pie crust, or gravy, which don't use baking powder or aren't altitude-sensitive the same way. Pizza yeast is <b>not</b> numerically reduced here — the reliable altitude advice for yeast is to shorten the rise by watching the dough, not to cut the yeast by a fixed percent. Above 7,000 ft the quick-bread numbers are stretched past what the sources cover.</p>
+<p class="note">Flour is measured spooned and leveled (120 g/cup). No recipe here has been bake-tested by me. Bake a batch before you trust it for a job.</p>
+</details>
+
+<details class="card">
+<summary>Bread & chef-pizza sources</summary>
+<p class="note"><b>Breads:</b> the Whole Wheat Sandwich Bread is King Arthur's published "Classic 100% Whole Wheat Bread." The Whole Wheat Sourdough Sandwich Bread and the Whole Wheat Sourdough Pita are both real, published formulas from The Perfect Loaf (Maurizio Leo) — I checked the gram totals against the source and they add up. The 100% Whole Wheat Sourdough (hearth loaf) is my own <b>adapted</b> formula, built from the hydration and levain-ratio principles in The Perfect Loaf's sourdough guide — not a single named recipe of theirs. The Whole Wheat No-Knead Bread is <b>adapted</b> from Jim Lahey's original No-Knead Bread method (New York Times, 2006) using a whole-wheat version documented by home bakers, with vital wheat gluten added for structure. Every bread's whole-grain percentage is computed from its actual flours, including the flour used to feed the starter — not just the flour added at the dough stage.</p>
+<p class="note"><b>Chef pizzas:</b> Pizzeria Bianco's dough (Chris Bianco) and Roberta's dough are both real published recipes — Bianco's from Food & Wine, Roberta's originally from NYT Cooking. Lucali's dough (Mark Iacono) is from his own published recipe via Good Morning America/ABC News — I found that the ingredient amounts as published sum to noticeably more than the stated 8×10oz portioning, so I flag that instead of quietly forcing the math to fit. The Tony Gemignani-style dough is <b>adapted</b>: his linked article is home-oven shopping and technique guidance (flour choice, diastatic malt, the two-steel method), not a numbered formula, so the percentages here follow the same range he describes for high-protein home-oven dough rather than his exact published figures.</p>
+<p class="note">For any pizza flour, "unbleached" alone doesn't mean unenriched — check the ingredient label on the specific bag you buy for added niacin, iron, thiamine, riboflavin, or folic acid, which mean it's enriched.</p>
+</details>
+</main>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var clamp=function(v,lo,hi){return Math.min(hi,Math.max(lo,v))};
+var FL=.4,SG=.2381,SA=.1667,BP=.25,SO=.1818,BU=.2113,LQ=.2029;
+
+// ---- ingredient tables ----
+var BI=[['flour','All-purpose flour',360,'g',FL],['bp','Baking powder',12,'g',BP],['soda','Baking soda',2,'g',SO],['salt','Fine salt',7,'g',SA],['sugar','Sugar',12,'g',SG],['butter','Cold butter',170,'g',BU],['milk','Cold buttermilk',295,'ml',LQ]];
+var PAULA=[['flour','All-purpose flour',250,'g',FL],['bp','Baking powder',5,'g',BP],['salt','Fine salt',3,'g',SA],['butter','Cold unsalted butter',115,'g',BU],['milk','Cold buttermilk',240,'ml',LQ]];
+var BLUE=BI.map(function(x){return x[0]==='sugar'?['sugar','Sugar',40,'g',SG]:x}).concat([['blue','Frozen blueberries',240,'g',.324],['#','Glaze'],['psug','Powdered sugar',120,'g',.4],['gm','Milk',30,'ml',LQ],['van','Vanilla',2.5,'ml',LQ]]);
+
+var R=[
+{id:'bis-classic',group:'Biscuits',style:'Southern Buttermilk',name:'Classic',u:['biscuit','biscuits'],b:12,c:[1,4,6,12,24,36],d:12,min:1,max:120,k:'q',cut:['bp','soda'],lq:[1,2],li:'milk',ov:1,t:425,tm:['12 to 15','10 to 13'],v:1,tp:1,ing:BI,
+ st:['Freeze the butter 15 minutes. Heat the oven to {T}°F with a rack in the middle. Line {P} with parchment.','Whisk flour, baking powder, baking soda, sugar, and salt.','Grate or cut in the butter until it looks like coarse crumbs with pea-size bits.','Stir in the cold buttermilk until shaggy. Do not overmix.','Pat out to 1/2 inch, fold in thirds 3 to 4 times, then pat to 1 inch.','Cut straight down with a 2.5 inch cutter. Do not twist. Set them touching.','Bake {M} minutes at {T}°F until deep golden.']},
+{id:'bis-paula',group:'Biscuits',style:'Southern Buttermilk',name:'Paula Deen-style',u:['biscuit','biscuits'],b:8,c:[1,4,8,16,24],d:8,min:1,max:120,k:'q',cut:['bp'],lq:[1,2],li:'milk',ov:1,t:450,tm:['12 to 15','10 to 13'],v:1,tp:1,
+ ing:PAULA,nt:'No baking soda or sugar in this version — a simpler, richer style with more butter per cup of flour than the classic recipe.',
+ st:['Heat the oven to {T}°F. Line {P} with parchment.','Whisk flour, baking powder, and salt.','Cut in the cold butter with a pastry blender or your fingers until it looks like coarse crumbs.','Whisk in the buttermilk just until the dough comes together. Do not overmix.','Pat to 1 inch thick. Cut with a biscuit cutter or sharp knife. Set on the sheet.','Bake {M} minutes at {T}°F until golden.']},
+{id:'blue',group:'Biscuits',style:'Blueberry',name:'With vanilla glaze',u:['biscuit','biscuits'],b:12,c:[1,4,6,12,24,36],d:12,min:1,max:120,k:'q',cut:['bp','soda'],lq:[1,2],li:'milk',ov:1,t:425,tm:['14 to 17','12 to 15'],v:1,tp:1,ing:BLUE,
+ st:['Freeze the butter 15 minutes. Keep the blueberries frozen. Heat the oven to {T}°F with a rack in the middle. Line {P} with parchment.','Whisk flour, baking powder, baking soda, sugar, and salt. Grate or cut in the butter to coarse crumbs.','Stir in the buttermilk until shaggy, then fold in the frozen blueberries gently.','Pat to 1 inch and cut straight down. The dough is wetter than plain biscuits, so flour your hands. Set them touching.','Bake {M} minutes at {T}°F until golden. Cool 5 minutes.','Whisk the glaze until it drizzles, adding milk a few drops at a time. Drizzle on the warm biscuits.']},
+{id:'corn',group:'Quick breads',style:'Cornbread',name:'Southern skillet',u:['wedge','wedges'],b:8,c:[4,8,16],d:8,min:1,max:64,k:'q',cut:['bp','soda'],lq:[1,2],li:'milk',ov:1,t:425,tm:['20 to 25','18 to 22'],
+ ing:[['corn','Cornmeal',210,'g',.343],['flour','All-purpose flour',60,'g',FL],['bp','Baking powder',6,'g',BP],['soda','Baking soda',1.5,'g',SO],['salt','Fine salt',6,'g',SA],['egg','Egg',50,'g','egg'],['milk','Buttermilk',300,'ml',LQ],['fat','Bacon drippings or butter, melted',50,'g',.23]],
+ st:['Put a 10 inch cast iron skillet in the oven while it heats to {T}°F.','Whisk cornmeal, flour, baking powder, baking soda, and salt.','Whisk the egg and buttermilk, then stir into the dry mix. Stir in about three quarters of the melted fat.','Pull the hot skillet out, swirl in the rest of the fat, and pour in the batter. It should sizzle.','Bake {M} minutes until golden and set in the middle.'],nt:'No sugar, Southern style. 8 wedges fills one 10 inch skillet.'},
+{id:'pan',group:'Quick breads',style:'Pancakes',name:'Buttermilk',u:['pancake','pancakes'],b:8,c:[4,8,12,24],d:8,min:1,max:96,k:'q',cut:['bp','soda'],lq:[1,2],li:'milk',ov:0,
+ ing:[['flour','All-purpose flour',190,'g',FL],['sugar','Sugar',12,'g',SG],['bp','Baking powder',4,'g',BP],['soda','Baking soda',2.5,'g',SO],['salt','Fine salt',3,'g',SA],['egg','Egg',50,'g','egg'],['milk','Buttermilk',295,'ml',LQ],['butter','Melted butter',42,'g',BU]],
+ st:['Whisk flour, sugar, baking powder, baking soda, and salt.','Whisk the egg, buttermilk, and melted butter. Stir into the dry mix. Lumps are fine.','Rest 5 minutes. Heat a griddle to medium, about 375°F.','Pour 1/4 cup per pancake. Flip when bubbles pop and edges look set, about 2 minutes. Cook 1 to 2 minutes more.']},
+{id:'ftor',group:'Tortillas and noodles',style:'Tortillas',name:'Flour',u:['tortilla','tortillas'],b:8,c:[4,8,12,24],d:8,min:1,max:96,k:'n',
+ ing:[['flour','All-purpose flour',250,'g',FL],['bp','Baking powder',4,'g',BP],['salt','Fine salt',6,'g',SA],['fat','Lard or shortening',45,'g',.23],['water','Warm water',180,'ml',LQ]],
+ st:['Whisk flour, baking powder, and salt. Rub in the fat with your fingers.','Add warm water and knead 2 minutes until smooth. Cover and rest 20 minutes.','Divide into balls of about {BALL} g each. Rest 10 minutes.','Roll each to a thin 8 inch round.','Cook in a dry skillet on medium-high, about 30 seconds per side, until spotted and puffy. Keep warm in a towel.'],an:'Altitude changes little here. Dry air stiffens the dough, so keep it covered.'},
+{id:'ctor',group:'Tortillas and noodles',style:'Tortillas',name:'Corn',u:['tortilla','tortillas'],b:12,c:[6,12,24,36],d:12,min:1,max:96,k:'n',v:1,
+ ing:[['masa','Masa harina (not cornmeal)',240,'g',.42],['salt','Fine salt',3,'g',SA],['water','Warm water',330,'ml',LQ]],
+ st:['Mix masa and salt. Add the warm water and knead until it feels like soft clay. Add water a tablespoon at a time if it cracks. Add masa if it sticks.','Cover and rest 15 to 30 minutes.','Roll into balls of about {BALL} g each. Keep them covered.','Press each between plastic to about 6 inches.','Cook on a hot dry skillet: 30 to 45 seconds, flip for 45 to 60 seconds, flip again for 15 to 30 seconds until it puffs.'],an:'Masa varies by brand, so go by feel. Dry air dries masa fast. Keep it covered.'},
+{id:'nood',group:'Tortillas and noodles',style:'Egg noodles',name:'Classic',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:24,k:'n',v:1,
+ ing:[['flour','All-purpose flour',250,'g',FL],['egg','Eggs',100,'g','egg'],['milk','Milk',45,'ml',LQ],['salt','Fine salt',4,'g',SA]],
+ st:['Beat the eggs with the milk and salt. Mix in the flour to a stiff dough. Add flour or a few drops of milk to fix it.','Knead 5 minutes until smooth. Cover and rest 30 minutes.','Roll very thin, about 1/16 inch. Cut into 1/4 inch strips.','Let the strips dry 20 minutes or more.','Boil in salted water 3 to 5 minutes, or drop into simmering broth.'],an:'Altitude does not matter for noodles. Humidity does, so add flour or milk by feel.'},
+{id:'pasta',group:'Tortillas and noodles',style:'Fresh pasta',name:'Basic egg pasta',u:['serving','servings'],b:1,c:[2,4,6,8],d:4,min:1,max:20,k:'s',v:1,
+ ing:[['flour','00 or all-purpose flour',100,'g',FL],['egg','Whole egg',50,'g','egg'],['salt','Fine salt',0.4,'g',SA]],
+ st:['Mound the flour, make a well, and crack the eggs into the center.','Whisk the eggs with a fork, gradually pulling in flour from the sides.','Once shaggy, knead by hand 8 to 10 minutes until smooth and elastic.','Wrap and rest 30 minutes at room temperature.','Roll thin (by hand or pasta machine) and cut into the shape you want.','Cook in well-salted boiling water 2 to 4 minutes for fresh pasta, until it floats and is tender.'],
+ an:'No elevation adjustment — this dough has no chemical leavening. At altitude, water boils at a lower temperature, so fresh pasta may need a minute or two longer to cook; taste it rather than trust the clock.',
+ nt:'One egg (about 50 g) and 100 g flour per serving. If your eggs run smaller, weigh them and make up the difference with a splash of water.'},
+{id:'pie',group:'Dough',style:'Pie crust',name:'Classic',u:['crust','crusts'],b:1,c:[1,2,3,4],d:1,min:1,max:8,k:'n',
+ ing:[['flour','All-purpose flour',150,'g',FL],['sugar','Sugar',6,'g',SG],['salt','Fine salt',3,'g',SA],['butter','Cold butter',105,'g',BU],['water','Ice water',50,'ml',LQ]],
+ st:['Whisk flour, sugar, and salt. Cut in the cold butter until pea-size and almond-size pieces remain.','Sprinkle in the ice water. Toss until it just holds when squeezed. Add water 1 teaspoon at a time if needed.','Shape into a disk, wrap, and chill at least 1 hour.','Roll out to about 12 inches and 1/8 inch thick. Bake following your pie recipe.'],an:'No proven altitude rule for pie crust. Dry air may need a little extra water, added by the teaspoon.'},
+{id:'gravy',group:'Sides',style:'Sausage gravy',name:'Classic',u:['serving','servings'],b:6,c:[2,4,6,12],d:6,min:1,max:30,k:'n',
+ ing:[['saus','Breakfast sausage',454,'g',0],['flour','All-purpose flour',40,'g',FL],['milk','Whole milk',720,'ml',LQ],['pep','Black pepper',2,'g',.43],['salt','Fine salt (to taste)',1.5,'g',SA]],
+ st:['Brown the sausage in a skillet over medium heat, crumbling it. Do not drain the fat.','Sprinkle the flour over it and stir 1 minute.','Pour in the milk slowly, stirring.','Simmer 5 to 8 minutes until thick. Add more milk if too thick.','Season with plenty of pepper, and salt to taste.'],an:'Altitude does not change gravy.'}
+];
+
+// pizza is handled specially (kind 'p'), not in the generic ingredient table
+var PIZZA={id:'pizza',min:1,max:12};
+var PSTYLES={
+ ny:{label:'New York',unit:'pizza',options:[['10"',200],['12"',250],['14"',350],['16"',450]],
+  pct:{water:.62,salt:.02,oil:.02,yeast:.005},
+  ferment:'Divide into balls. Rest, covered, 1 to 2 hours at room temperature — or refrigerate 24 to 72 hours for better flavor.',
+  bake:'Bake as hot as your oven goes (ideally 500°F+ with a stone or steel) until the crust is charred in spots, about 6 to 10 minutes.'},
+ nap:{label:'Neapolitan',unit:'pizza',options:[['10"',220],['12"',280]],
+  pct:{water:.60,salt:.03,oil:0,yeast:.002},
+  ferment:'Bulk ferment 8 to 24 hours at room temperature (or split between counter and fridge). Divide into balls and rest 2 to 6 hours more before stretching.',
+  bake:'This style wants extreme heat — 800°F+ in a dedicated pizza oven, 60 to 90 seconds. In a standard home oven, max it out with a stone or steel (usually 500 to 550°F) and expect 5 to 8 minutes; it will be good but not truly Neapolitan.',
+  note:'No oil or sugar in the dough — that\u2019s traditional. Very little yeast, since this relies on a long, slow rise for flavor, not a quick one.'},
+ det:{label:'Detroit',unit:'pan',options:[['8×10" pan',520],['10×14" pan',910]],
+  pct:{water:.75,salt:.02,oil:.02,yeast:.006},
+  ferment:'Let the dough rise in the bowl until doubled, about 1.5 to 2 hours. Press into a well-oiled steel or aluminum pan (do not use a stone), then let it rise again 45 minutes to 1 hour before topping.',
+  bake:'Bake at 450 to 475°F until the edges are deeply caramelized, about 12 to 16 minutes.',
+  note:'High hydration and no-knead — a few folds in the bowl build the gluten instead of kneading. Needs a pan, not a stone or steel.'}
+};
+
+// ---- number / fraction helpers ----
+function fr(x){
+  var W=Math.floor(x+1e-9),Rr=Math.round((x-W)*8);
+  if(Rr===8){W++;Rr=0}
+  var s=(W||'')+['','⅛','¼','⅜','½','⅝','¾','⅞'][Rr];
+  return s||'0';
+}
+// decompose eighths into physically-measurable spoon combo (only 1/8,1/4,1/2,1 exist as spoons)
+function spoonCombo(totalEighths,unit){
+  var W=Math.floor(totalEighths/8),rem=totalEighths%8;
+  var parts=[];
+  if(W>0) parts.push(W+' '+unit+(W>1?'s':''));
+  var pieces=[[4,'½'],[2,'¼'],[1,'⅛']];
+  pieces.forEach(function(p){while(rem>=p[0]){parts.push(p[1]+' '+unit);rem-=p[0]}});
+  return parts.join(' + ')||('0 '+unit);
+}
+function isCleanSpoon(eighths){return [0,1,2,4,8].indexOf(eighths%8===0?8:eighths%8)>-1 || eighths%8===0}
+function vol(t,unitless){
+  if(t<0.0625) return {txt:'tiny pinch',approx:true};
+  if(t>=36){var c=t/48,ce=Math.round(c*8);return {txt:(ce%8===0||[1,2,4].indexOf(ce%8)>-1)?fr(ce/8)+(ce/8>1?' cups':' cup'):spoonCombo(ce,'cup'),approx:false}}
+  if(t>=2.5){var tb=t/3,te=Math.round(tb*8);return {txt:(te%8===0||[1,2,4].indexOf(te%8)>-1)?fr(te/8)+' tbsp':spoonCombo(te,'tbsp'),approx:false}}
+  var e=Math.max(1,Math.round(t*8));
+  return {txt:(e%8===0||[1,2,4].indexOf(e%8)>-1)?fr(e/8)+' tsp':spoonCombo(e,'tsp'),approx:false};
+}
+function gm(x,u){return (x<1?x.toFixed(2):x<10?x.toFixed(1):Math.round(x))+' '+u}
+
+// ---- breads ----
+var BREADS=[
+{id:'ka-ww-sandwich',name:'Whole Wheat Sandwich Bread',source:'King Arthur ("Classic 100% Whole Wheat Bread")',url:'https://www.kingarthurbaking.com/recipes/classic-100-whole-wheat-bread-recipe',adapted:false,
+ baseLoaves:1,unit:'loaf',pan:'9"×5" loaf pan',
+ flours:[{name:'King Arthur Premium 100% Whole Wheat Flour',g:397,wg:1,v:FL}],
+ water:241,starter:null,salt:7.5,
+ other:[{name:'Vegetable oil',g:50,v:LQ},{name:'Honey (or molasses/maple syrup)',g:85,v:LQ},{name:'Instant yeast',g:7.5,v:.32},{name:'Nonfat dry milk',g:30,v:.4}],
+ bulkHrs:[1,2],proofHrs:[1,2],bakeNote:'Bake 35 to 40 minutes at 350°F, tenting with foil if the top browns too fast.',
+ method:['Combine everything in a bowl and stir until the dough starts to leave the sides of the bowl. Rest 20 to 30 minutes.','Knead 6 to 8 minutes by hand or mixer until smooth and supple.','Bulk rise, covered, {BULK} — until puffy, not necessarily doubled.','Shape into an 8" log and place in the pan. Rise again, covered, {PROOF}, until crowned about 1" over the rim.','Bake 35 to 40 minutes at 350°F.']},
+{id:'tpl-ww-sourdough-sandwich',name:'Whole Wheat Sourdough Sandwich Bread',source:'The Perfect Loaf (Maurizio Leo)',url:'https://www.theperfectloaf.com/whole-wheat-sourdough-sandwich-bread/',adapted:false,
+ baseLoaves:1,unit:'loaf',pan:'9"×5"×2.75" loaf pan',
+ flours:[{name:'White whole wheat flour',g:509,wg:1,v:FL},{name:'High-extraction wheat flour, e.g. Type 85 (check label — not automatically whole grain; verify unenriched)',g:77,wg:0,v:FL}],
+ water:524,starter:{g:77,hydration:1.05,wg:.6,name:'Ripe liquid levain (mixed-flour build, simplified here)'},salt:12,other:[],
+ bulkHrs:[3.5,4],proofHrs:[0,0],bakeNote:'Bake 20 minutes at 450°F with steam, 30 more minutes at 450°F without steam, then finish 15 to 20 minutes at 425°F.',
+ method:['Build the levain and let it ripen (several hours at room temperature, or use your regular ripe starter).','Autolyse the flour with most of the water for 2 hours.','Mix in the levain and remaining water, then salt. Build strength with slap-and-folds or in-bowl folds.','Bulk ferment {BULK} at a warm room temperature with 5 sets of stretch-and-folds spaced 30 minutes apart.','Shape into a tight log and place in the oiled pan. Cover and retard in the fridge 10 to 14 hours.','Bake as above, straight from the fridge.']},
+{id:'tpl-ww-pita',name:'Whole Wheat Sourdough Pita',source:'The Perfect Loaf (Maurizio Leo)',url:'https://www.theperfectloaf.com/whole-wheat-sourdough-pita/',adapted:false,
+ baseLoaves:10,unit:'pita',pan:'baking steel or stone, 550°F+',
+ flours:[{name:'Whole wheat bread flour',g:632,wg:1,v:FL}],
+ water:521,starter:{g:139,hydration:1.0,wg:1.0,name:'Overnight levain (or ripe starter)'},salt:14,other:[{name:'Olive oil',g:14,v:LQ}],
+ bulkHrs:[3,3],proofHrs:[1,1],bakeNote:'Bake as hot as your oven goes (ideally 550°F+) with a preheated steel or stone — 1 to 2 minutes per side.',
+ method:['Build the levain the night before and let it ripen at room temperature, or use your ripe starter.','Mix flour, levain, salt, and most of the water. Knead 6 to 8 minutes, then rest 5 minutes.','Work in the remaining water gradually and the olive oil. Knead until smooth and cohesive.','Bulk ferment {BULK} with 2 sets of stretch-and-folds 30 minutes apart.','Divide into pieces, shape into tight balls, and proof {PROOF}.','Roll each ball to about 1/8" thick, 7" round, and bake on the hot steel/stone until puffed, flipping once.']},
+{id:'adapted-100ww-sourdough',name:'100% Whole Wheat Sourdough (hearth loaf)',source:'Adapted — from The Perfect Loaf\u2019s general sourdough hydration/levain guidance, not one named recipe',url:'https://www.theperfectloaf.com/sourdough/',adapted:true,
+ baseLoaves:1,unit:'loaf',pan:'banneton + Dutch oven',
+ flours:[{name:'Whole wheat bread flour',g:500,wg:1,v:FL}],
+ water:375,starter:{g:100,hydration:1.0,wg:1.0,name:'Ripe starter, 100% hydration'},salt:12,other:[],
+ bulkHrs:[4,6],proofHrs:[1,2],bakeNote:'Bake covered 20 minutes at 475°F, then uncovered 20 to 25 minutes until deeply browned.',
+ method:['Mix flour and water, autolyse 30 to 60 minutes.','Add starter and salt, mix to combine.','Bulk ferment {BULK} — whole wheat ferments faster than white flour, so watch the dough.','Shape into a boule, place seam-up in a floured banneton, and proof {PROOF}, or retard overnight in the fridge.','Score and bake covered, then uncovered, as above.']},
+{id:'adapted-ww-noknead',name:'Whole Wheat No-Knead Bread',source:'Adapted — Jim Lahey/NYT original method, whole-wheat version as documented by home bakers',url:'https://www.thefreshloaf.com/comment/12604',adapted:true,
+ baseLoaves:1,unit:'loaf',pan:'Dutch oven',
+ flours:[{name:'Whole wheat flour',g:430,wg:1,v:FL}],
+ water:458,starter:null,salt:8,other:[{name:'Instant yeast',g:1,v:.32},{name:'Vital wheat gluten (helps structure since there\u2019s no kneading)',g:12,v:FL}],
+ bulkHrs:[14,20],proofHrs:[1.5,2],bakeNote:'Bake covered 30 minutes at 450°F, then uncovered 15 to 20 minutes until deeply browned.',
+ method:['Stir everything together into a wet, shaggy dough — no kneading.','Cover and let sit at room temperature {BULK} (this long, cool rest is what builds structure, not kneading).','Turn out onto a floured surface, fold over itself a couple of times, and shape loosely into a ball.','Rest, covered, {PROOF} on a floured towel.','Bake in a preheated, covered Dutch oven as above.']}
+];
+
+// ---- chef pizzas ----
+var CHEFPIZZA=[
+{id:'bianco',chef:'Pizzeria Bianco (Chris Bianco)',source:'Food & Wine',url:'https://www.foodandwine.com/bianco-pizza-dough-6418483',adapted:false,
+ baseCount:4,size:'10"',
+ flours:[{name:'Bread flour or other high-protein flour (check label — verify unenriched)',g:667,v:FL}],
+ water:473,yeast:{name:'Active dry yeast',g:7,v:.32},salt:12,oil:0,
+ discrepancy:null,
+ ferment:'Rise, covered, 2 to 2.5 hours at room temperature until doubled and finger-poke holds its dent.',
+ bake:'Bake as hot as your home oven goes with a stone or steel, or in a wood/gas pizza oven.',
+ method:['Dissolve the yeast in the warm water and let it sit 5 minutes.','Mix in the flour gradually until it comes together, then add the salt.','Turn out and knead by hand about 10 minutes, until smooth, soft, and a little tacky.','Rise, covered, until doubled.','Divide into {N} balls, shape, and let rest before stretching and baking.']},
+{id:'robertas',chef:"Roberta's (Brooklyn)",source:'NYT Cooking / Epicurious',url:'https://www.epicurious.com/recipes/food/views/robertas-pizza-dough-yeast',adapted:false,
+ baseCount:2,size:'12"',
+ flours:[{name:'00 flour',g:153,v:FL},{name:'All-purpose flour (check label — verify unenriched)',g:153,v:FL}],
+ water:200,yeast:{name:'Active dry yeast',g:2,v:.32},salt:8,oil:4,
+ discrepancy:null,
+ ferment:'Rest 15 minutes, knead 3 minutes more, then rise 3 to 4 hours at room temperature — or refrigerate up to 3 days for more flavor.',
+ bake:'Bake as hot as your oven goes, ideally 500°F+ with a stone.',
+ method:['Whisk the flours and salt together in a bowl.','Stir together the water, yeast, and olive oil; pour into the flour.','Mix by hand until no dry lumps remain, then rest 15 minutes.','Knead 3 more minutes until smooth.','Rise as above, then divide into {N} balls.']},
+{id:'lucali',chef:'Lucali (Mark Iacono)',source:'ABC News / Good Morning America',url:'https://abcnews.com/GMA/Food/chef-mark-iacono-shares-homemade-pizza-salad-recipes/story?id=102487460',adapted:false,
+ baseCount:8,size:'14"',
+ flours:[{name:'Bread flour (check label — verify unenriched)',g:1587.5,v:FL}],
+ water:952.6,yeast:{name:'Yeast (type unspecified in source)',g:8.5,v:.32},salt:36,oil:27,
+ discrepancy:'This source states eight 10-oz (283g) balls — about 2,268g total — but the published ingredient amounts actually sum to about 2,612g, roughly 15% more. Rather than quietly forcing the numbers to match, this app scales from the real ingredient sum, so each of the 8 balls here comes out closer to 327g than exactly 10oz.',
+ ferment:'Knead about 10 minutes, rest 45 minutes, portion into balls, brush with oil, then refrigerate 6 hours to overnight.',
+ bake:'Bake at 500°F on a sheet pan (as published) or a stone/steel, until the edges are crispy.',
+ method:['Dissolve salt in a portion of the water; dissolve yeast in the rest with the olive oil.','Mix in about a quarter of the flour until smooth, then the salted water, then the rest of the flour.','Knead about 10 minutes until smooth.','Rest 45 minutes, then divide into {N} balls.','Refrigerate 6 hours to overnight before stretching and baking.']},
+{id:'gemignani',chef:'Tony Gemignani-style (home oven)',source:'Adapted — tonygemignani.com guidance + typical published New York-style ratios; not his exact figures',url:'https://tonygemignani.com/blog-post/making-pizza-at-home-the-tony-gemignani-way-part-1/',adapted:true,
+ baseCount:2,size:'14"',ballWeight:350,
+ pct:{water:.63,salt:.025,oil:.02,yeast:.004,malt:.02},
+ flourNote:'Use a high-protein bread flour (Gemignani points to King Arthur Sir Lancelot or similar) — not a 00/Neapolitan flour, which won\u2019t brown well below about 650°F.',
+ discrepancy:null,
+ ferment:'Rise 1.5 to 2 hours, ball, then refrigerate 24 to 72 hours. Bring to room temperature before stretching.',
+ bake:'Bake at 500°F using two steels if you have them — one on top, one on a lower rack — moving the pizza down partway through for a crisper bottom.',
+ method:['Whisk the flour and diastatic malt together.','Add water and yeast, mix until shaggy, rest 20 minutes.','Add salt and oil, knead until smooth.','Rise, then divide into {N} balls of about {BALL}g each.','Refrigerate 24 to 72 hours, then bring to room temperature and stretch to shape.']}
+];
+
+function fermFactor(temp){return Math.pow(2,(78-temp)/17)}
+function fermRange(hrs,temp){
+  var f=fermFactor(temp);
+  var lo=hrs[0]*f,hi=hrs[1]*f;
+  var r=function(x){return x<2?Math.round(x*4)/4:Math.round(x*2)/2};
+  lo=r(lo);hi=r(hi);
+  if(hi<=lo) return lo+' hours';
+  return lo+' to '+hi+' hours';
+}
+function altBreadNote(ft){
+  if(ft<3000) return 'Under 3,000 ft, fermentation times run close to what\u2019s written above.';
+  var t=Math.min(1,(ft-3000)/5000);
+  var pct=Math.round((25+t*20));
+  return 'Above 3,000 ft, fermentation runs faster — roughly '+pct+'% quicker is a reasonable ballpark up here, but it varies by dough and starter. Watch the dough\u2019s size and feel rather than the clock, and check it earlier than you think you should.'+(ft>=4500?' At Prescott, AZ\u2019s elevation (~5,300 ft), this effect is real but not huge for bread — baking temperature and time don\u2019t need adjusting the way quick breads do.':'');
+}
+
+var curBread=null,curChefPizza=null,curBMode='loaves';
+
+function computeBread(r,mult){
+  var flours=r.flours.map(function(f){return {name:f.name,g:f.g*mult,wg:f.wg,v:f.v}});
+  var waterDirect=r.water*mult;
+  var starterFlour=0,starterWater=0,starterG=0,starterWG=0;
+  if(r.starter){
+    starterG=r.starter.g*mult;
+    starterFlour=starterG/(1+r.starter.hydration);
+    starterWater=starterG-starterFlour;
+    starterWG=r.starter.wg;
+  }
+  var totalFlour=flours.reduce(function(s,f){return s+f.g},0)+starterFlour;
+  var totalWater=waterDirect+starterWater;
+  var wgFlour=flours.reduce(function(s,f){return s+f.g*f.wg},0)+starterFlour*starterWG;
+  var saltG=r.salt*mult;
+  var other=(r.other||[]).map(function(o){return {name:o.name,g:o.g*mult,v:o.v}});
+  var totalDough=flours.reduce(function(s,f){return s+f.g},0)+waterDirect+starterG+saltG+other.reduce(function(s,o){return s+o.g},0);
+  return {flours:flours,waterDirect:waterDirect,starterG:starterG,saltG:saltG,other:other,totalFlour:totalFlour,totalWater:totalWater,
+    hydrationPct:totalWater/totalFlour*100,wgPct:wgFlour/totalFlour*100,totalDough:totalDough};
+}
+
+function renderBread(){
+  var r=curBread;
+  var n,mult;
+  if(curBMode==='loaves'){
+    var res=parseQty($('bcount').value,1,60);
+    $('bcounterr').textContent=res.err||'';
+    if(res.err){$('out').innerHTML='';return}
+    n=res.n;mult=n/r.baseLoaves;
+  }else{
+    var w=parseFloat($('bweight').value);
+    if(!w||w<=0){$('bcounterr').textContent='Enter a target dough weight in grams.';$('out').innerHTML='';return}
+    $('bcounterr').textContent='';
+    var base=computeBread(r,1);
+    mult=w/base.totalDough;
+    n=Math.round(mult*r.baseLoaves*10)/10;
+  }
+  var c=computeBread(r,mult);
+  var ft=parseInt(($('elev').value||'0').replace(/[^\d]/g,''),10)||0;
+  var temp=parseInt($('ktemp').value,10);if(!temp||temp<50||temp>95)temp=70;
+  try{localStorage.setItem('bk_r','bread:'+r.id);localStorage.setItem('bk_ft',$('elev').value);localStorage.setItem('bk_bmode',curBMode);
+    localStorage.setItem('bk_bcount',$('bcount').value||'');localStorage.setItem('bk_bweight',$('bweight').value||'');localStorage.setItem('bk_ktemp',String(temp));}catch(e){}
+
+  var rows=c.flours.map(function(f){return '<tr><td>'+f.name+'</td><td class="g">'+gm(f.g,'g')+'</td><td class="v">'+vol(f.g*f.v).txt+'</td></tr>'}).join('');
+  rows+='<tr><td>Water</td><td class="g">'+gm(c.waterDirect,'ml')+'</td><td class="v">'+vol(c.waterDirect*LQ).txt+'</td></tr>';
+  if(r.starter) rows+='<tr><td>'+r.starter.name+'</td><td class="g">'+gm(c.starterG,'g')+'</td><td class="v">—</td></tr>';
+  rows+='<tr><td>Fine sea salt</td><td class="g">'+gm(c.saltG,'g')+'</td><td class="v">'+vol(c.saltG*SA).txt+'</td></tr>';
+  c.other.forEach(function(o){rows+='<tr><td>'+o.name+'</td><td class="g">'+gm(o.g,'g')+'</td><td class="v">'+vol(o.g*o.v).txt+'</td></tr>'});
+
+  var bulk=fermRange(r.bulkHrs,temp);
+  var proof=r.proofHrs[1]>0?fermRange(r.proofHrs,temp):'';
+  var steps=r.method.map(function(s){return '<li>'+s.replace('{BULK}',bulk).replace('{PROOF}',proof)+'</li>'}).join('');
+  var srcLine='<a href="'+r.url+'" target="_blank" rel="noopener">'+r.source+'</a>'+(r.adapted?' — <b>adapted</b>, see note below':' — published recipe');
+
+  var plural=r.unit==='loaf'?'loaves':(r.unit+'s');
+  var un=n===1?r.unit:plural;
+  $('out').innerHTML=
+   '<section class="card"><h2>Ingredients for '+n+' '+un+'</h2><table>'+rows+'</table>'+
+   '<p class="note">Total dough: '+gm(c.totalDough,'g')+' · Hydration: '+Math.round(c.hydrationPct)+'% (starter\u2019s own flour and water included) · Whole grain: '+Math.round(c.wgPct)+'%</p>'+
+   '<p class="note">'+srcLine+'</p></section>'+
+   '<section class="card"><h2>Fermentation, around '+temp+'°F</h2>'+
+   '<p class="note" style="margin:0">Bulk ferment roughly '+bulk+(proof?', then proof roughly '+proof+' more':'')+'. This is a rough guide — go by how the dough looks and feels, not the clock.</p>'+
+   '<p class="note">'+altBreadNote(ft)+'</p></section>'+
+   '<section class="card"><h2>Pan / setup</h2><p class="note" style="margin:0">'+r.pan+'</p></section>'+
+   '<section class="card"><h2>Method</h2><ol>'+steps+'</ol><p class="note">'+r.bakeNote+'</p></section>';
+}
+
+function computeChefPizza(r,mult,n){
+  if(r.pct){
+    var ballWeight=r.ballWeight,totalDough=ballWeight*n;
+    var divisor=1+r.pct.water+r.pct.salt+r.pct.oil+r.pct.yeast+(r.pct.malt||0);
+    var flourG=totalDough/divisor;
+    return {flours:[{name:'Bread flour',g:flourG,v:FL}],water:flourG*r.pct.water,yeast:flourG*r.pct.yeast,salt:flourG*r.pct.salt,oil:flourG*r.pct.oil,malt:flourG*(r.pct.malt||0),totalDough:totalDough};
+  }
+  var flours=r.flours.map(function(f){return {name:f.name,g:f.g*mult,v:f.v}});
+  var totalFlour=flours.reduce(function(s,f){return s+f.g},0);
+  var water=r.water*mult,yeastG=r.yeast.g*mult,salt=r.salt*mult,oil=r.oil*mult;
+  var totalDough=totalFlour+water+yeastG+salt+oil;
+  return {flours:flours,water:water,yeast:yeastG,salt:salt,oil:oil,totalDough:totalDough};
+}
+
+function renderChefPizza(){
+  var r=curChefPizza;
+  var res=parseQty($('cpcount').value,1,20);
+  $('cpcounterr').textContent=res.err||'';
+  if(res.err){$('out').innerHTML='';return}
+  var n=res.n,mult=n/r.baseCount;
+  try{localStorage.setItem('bk_r','cp:'+r.id);localStorage.setItem('bk_cpcount',$('cpcount').value)}catch(e){}
+  var c=computeChefPizza(r,mult,n);
+  var rows=c.flours.map(function(f){return '<tr><td>'+f.name+'</td><td class="g">'+gm(f.g,'g')+'</td><td class="v">'+vol(f.g*f.v).txt+'</td></tr>'}).join('');
+  rows+='<tr><td>Water</td><td class="g">'+gm(c.water,'ml')+'</td><td class="v">'+vol(c.water*LQ).txt+'</td></tr>';
+  rows+='<tr><td>'+(r.yeast?r.yeast.name:'Instant yeast')+'</td><td class="g">'+gm(c.yeast,'g')+'</td><td class="v">'+vol(c.yeast*(r.yeast?r.yeast.v:.32)).txt+'</td></tr>';
+  rows+='<tr><td>Fine sea salt</td><td class="g">'+gm(c.salt,'g')+'</td><td class="v">'+vol(c.salt*SA).txt+'</td></tr>';
+  if(c.oil>0) rows+='<tr><td>Olive oil</td><td class="g">'+gm(c.oil,'ml')+'</td><td class="v">'+vol(c.oil*LQ).txt+'</td></tr>';
+  if(r.pct&&r.pct.malt) rows+='<tr><td>Diastatic malt powder</td><td class="g">'+gm(c.malt,'g')+'</td><td class="v">'+vol(c.malt*.4).txt+'</td></tr>';
+  var perBall=c.totalDough/n;
+  var steps=r.method.map(function(s){return '<li>'+s.replace('{N}',n).replace('{BALL}',Math.round(r.ballWeight||perBall))+'</li>'}).join('').replace(/\b1 balls\b/g,'1 ball');
+  var srcLine='<a href="'+r.url+'" target="_blank" rel="noopener">'+r.source+'</a>'+(r.adapted?' — <b>adapted</b>, see note below':' — published recipe');
+  $('out').innerHTML=
+   '<section class="card"><h2>'+r.chef+' ('+r.size+') for '+n+' '+(n>1?'pizzas':'pizza')+'</h2><table>'+rows+'</table>'+
+   '<p class="note">Total dough: '+gm(c.totalDough,'g')+', about '+gm(perBall,'g')+' per ball.</p>'+
+   (r.flourNote?'<p class="note">'+r.flourNote+'</p>':'')+
+   '<p class="note">'+srcLine+'</p>'+
+   (r.discrepancy?'<p class="note warn">'+r.discrepancy+'</p>':'')+
+   '</section>'+
+   '<section class="card"><h2>Fermentation</h2><p class="note" style="margin:0">'+r.ferment+'</p></section>'+
+   '<section class="card"><h2>Method</h2><ol>'+steps+'</ol><p class="note">'+r.bake+'</p></section>';
+}
+
+function parseQty(s,min,max){
+  s=(s||'').toLowerCase().trim();
+  if(!s) return {err:'Enter a number.'};
+  var m=s.match(/^(a|one|half|\d+(?:\.\d+)?)?\s*(?:a\s+)?(dozen|doz|dz)$/);
+  var n;
+  if(m){var k=m[1];n=Math.round((!k||k==='a'||k==='one')?12:(k==='half'?6:(+k)*12))}
+  else if(/^\d+(\.\d+)?$/.test(s)) n=Math.round(parseFloat(s));
+  else return {err:'Enter a whole number, or something like "1 dozen" / "3 dozen".'};
+  if(n<min) return {err:'Minimum is '+min+'.'};
+  if(n>max) return {err:'Max here is '+max+' at once — do it in separate batches beyond that.'};
+  return {n:n};
+}
+function alt(ft,r){
+  if(ft<3000) return {l:0,q:0,o:0};
+  var t=Math.min(1,(ft-3000)/4000),lq=r.lq||[0,0];
+  return {l:.125+.125*t,q:lq[0]+t*(lq[1]-lq[0]),o:Math.round((ft>=5000?25:15+(ft-3000)/200)/5)*5};
+}
+
+var cur=R[0],lastCount=null,countTouched=false;
+
+function ingRow(i,mult,a,r){
+  if(i[0]==='#') return '<tr class="sec"><td colspan="3">'+i[1]+'</td></tr>';
+  var amt=i[2]*mult,ch='',v=i[4],vt,approx=false;
+  if(r.cut&&r.cut.indexOf(i[0])>-1&&a.l){amt*=1-a.l;ch=' <span class="chg">reduced</span>'}
+  if(i[0]===r.li&&a.q){amt+=a.q*14.79*mult;ch=' <span class="chg">increased</span>'}
+  if(v==='egg'){var e=amt/50,rr=Math.round(e*2)/2;if(Math.abs(e-rr)>.15||rr<.5)approx=true;vt=rr>=.5?fr(rr)+(rr>1?' eggs':' egg'):'beat & weigh'}
+  else if(v===0){var oz=amt/28.35;vt=oz>=16?fr(Math.round(oz/4)/4)+' lb':fr(Math.round(oz*2)/2)+' oz'}
+  else{var vv=vol(amt*v);vt=vv.txt;approx=vv.approx}
+  return '<tr><td>'+i[1]+ch+'</td><td class="g">'+gm(amt,i[3])+'</td><td class="v">'+(approx?'<span class="approx">●</span> ':'')+vt+'</td></tr>';
+}
+
+function renderGeneric(){
+  var r=cur;
+  var res=parseQty($('count').value,r.min,r.max);
+  $('counterr').textContent=res.err||'';
+  $('rangehint').textContent='Range: '+r.min+' to '+r.max+' '+r.u[1]+'.';
+  var out=$('out');
+  if(res.err){out.innerHTML='';return}
+  var n=res.n;
+  try{localStorage.setItem('bk_r',r.id);localStorage.setItem('bk_ft',$('elev').value);localStorage.setItem('bk_n',String(n))}catch(e){}
+  var ft=parseInt(($('elev').value||'0').replace(/[^\d]/g,''),10)||0;
+  var mult=n/r.b,a=alt(ft,r);
+  var rows=r.ing.map(function(i){return ingRow(i,mult,a,r)}).join('');
+  var hi=ft>=3000&&r.ov,temp=r.t?r.t+(r.ov?a.o:0):null,time=r.tm?(hi?r.tm[1]:r.tm[0]):'';
+  var un=r.u[n>1?1:0],tips='';
+  if(r.tp&&n<4) tips+='<p class="note warn">Tiny batch: the leavening amounts are very small. Consider making 4 and freezing the extra cut biscuits.</p>';
+  var totalSheets=Math.ceil(n/12);
+  if(r.tp&&totalSheets>1){
+    var atOnce=Math.min(totalSheets,2),rounds=Math.ceil(totalSheets/atOnce);
+    tips+='<p class="note warn">'+totalSheets+' sheet pan'+(totalSheets>1?'s':'')+' total. Most home ovens fit 2 at once, so plan on '+rounds+' baking round'+(rounds>1?'s':'')+'. Mix dough in batches of about 3 dozen so the butter stays cold.</p>';
+  }
+  var eh;
+  if(r.k==='n'||r.k==='s') eh='<p class="note" style="margin:0">'+(r.an||'No altitude adjustment applies to this recipe.')+'</p>';
+  else if(ft<3000) eh='<p class="note" style="margin:0">Under 3,000 ft the sea-level recipe works as written.</p>'+(r.an?'<p class="note">'+r.an+'</p>':'');
+  else{
+    eh='<ul><li>Baking powder'+(r.cut.indexOf('soda')>-1?' and soda':'')+' cut by '+Math.round(a.l*1000)/10+'%</li>';
+    eh+='<li>Buttermilk up by '+vol(a.q*3*mult).txt+'</li>';
+    if(r.ov) eh+='<li>Oven raised from '+r.t+' to '+temp+'°F</li><li>Start checking 2 minutes early</li>';
+    eh+='</ul>'+(r.an?'<p class="note">'+r.an+'</p>':'');
+    if(ft>7000) eh+='<p class="note warn">Above 7,000 ft these numbers are stretched past what the sources cover. Bake a small test batch and adjust.</p>';
+  }
+  var pans=Math.ceil(n/12)+' sheet pan'+(n>12?'s':'');
+  var ballWt=r.id==='ftor'?Math.round((250+4+6+45+180)/8*mult*(r.b/n)*(n/r.b)):r.id==='ctor'?Math.round((240+3+330)/12):null;
+  // compute actual ball weight from total dough / count for tortillas
+  if(r.id==='ftor'||r.id==='ctor'){
+    var totalDough=r.ing.reduce(function(s,i){return s+(i[3]==='g'||i[3]==='ml'?i[2]*mult:0)},0);
+    ballWt=Math.round(totalDough/n);
+  }
+  var steps=r.st.map(function(s){return '<li>'+s.replace(/\{T\}/g,temp).replace(/\{M\}/g,time).replace(/\{P\}/g,pans).replace(/\{N\}/g,n).replace(/\{S\}/g,n>1?'s':'').replace(/\{BALL\}/g,ballWt)+'</li>'}).join('');
+  out.innerHTML=
+   '<section class="card"><h2>Ingredients for '+n+' '+un+'</h2><table>'+rows+'</table>'+tips+'</section>'+
+   '<section class="card"><h2>Elevation: '+ft.toLocaleString()+' ft</h2>'+eh+'</section>'+
+   '<section class="card"><h2>Method</h2><ol>'+steps+'</ol>'+(r.nt?'<p class="note">'+r.nt+'</p>':'')+'</section>';
+}
+
+var curPStyle='ny',curPSizeIdx=2;
+function renderPizza(){
+  var st=PSTYLES[curPStyle];
+  var opt=curPSizeIdx;
+  var chosen=st.options[opt]||st.options[0];
+  var res=parseQty($('pcount').value,PIZZA.min,PIZZA.max);
+  $('pcounterr').textContent=res.err||'';
+  var out=$('out');
+  if(res.err){out.innerHTML='';return}
+  var n=res.n;
+  try{localStorage.setItem('bk_r','pizza');localStorage.setItem('bk_pstyle',curPStyle);localStorage.setItem('bk_psizeidx',String(opt));localStorage.setItem('bk_pcount',String(n))}catch(e){}
+  var perUnit=chosen[1];
+  var totalDough=perUnit*n;
+  var divisor=1+st.pct.water+st.pct.salt+st.pct.oil+st.pct.yeast;
+  var flour=totalDough/divisor;
+  var water=flour*st.pct.water,salt=flour*st.pct.salt,oil=flour*st.pct.oil,yeast=flour*st.pct.yeast;
+  var ft=parseInt(($('elev').value||'0').replace(/[^\d]/g,''),10)||0;
+  var rows='<tr><td>Bread or all-purpose flour</td><td class="g">'+gm(flour,'g')+'</td><td class="v">'+vol(flour*FL).txt+'</td></tr>'+
+   '<tr><td>Water, cool</td><td class="g">'+gm(water,'ml')+'</td><td class="v">'+vol(water*LQ).txt+'</td></tr>'+
+   '<tr><td>Salt</td><td class="g">'+gm(salt,'g')+'</td><td class="v">'+vol(salt*SA).txt+'</td></tr>';
+  if(oil>0) rows+='<tr><td>Olive oil</td><td class="g">'+gm(oil,'ml')+'</td><td class="v">'+vol(oil*LQ).txt+'</td></tr>';
+  rows+='<tr><td>Instant yeast</td><td class="g">'+gm(yeast,'g')+'</td><td class="v">'+vol(yeast*.32).txt+'</td></tr>';
+  var eh='<p class="note" style="margin:0">No numeric cut to the yeast — reliable altitude guidance for yeast dough is about behavior, not a fixed percentage.</p>'+
+   '<ul><li>Dough rises faster above about 3,000 ft. Let it rise until doubled by look, not by a fixed time — that could be 25 to 50% quicker above 5,000 ft.</li>'+
+   '<li>If the dough feels stiff, dry high-altitude air may call for a splash more water, added a tablespoon at a time.</li></ul>';
+  var un=n>1?(st.unit+'s'):st.unit;
+  out.innerHTML=
+   '<section class="card"><h2>'+st.label+' dough for '+n+' '+un+' ('+chosen[0]+')</h2><table>'+rows+'</table>'+
+   '<p class="note">Total dough: '+gm(totalDough,'g')+', about '+gm(perUnit,'g')+' per '+st.unit+'.</p>'+(st.note?'<p class="note">'+st.note+'</p>':'')+'</section>'+
+   '<section class="card"><h2>Elevation: '+ft.toLocaleString()+' ft</h2>'+eh+'</section>'+
+   '<section class="card"><h2>Method</h2><ol>'+
+   '<li>Combine flour and yeast. Add the water and mix until no dry flour remains. Rest 20 minutes (autolyse).</li>'+
+   '<li>Add salt'+(oil>0?' and oil':'')+'. '+(curPStyle==='det'?'Fold gently in the bowl a few times over 30 minutes — no kneading needed.':'Knead 5 to 8 minutes until smooth and elastic.')+'</li>'+
+   '<li>'+st.ferment+'</li>'+
+   '<li>Bring dough to room temperature before baking'+(curPStyle==='det'?'.':'. Stretch to shape.')+'</li>'+
+   '<li>'+st.bake+'</li></ol></section>';
+}
+
+function setChips(id,items,fn,activeVal){
+  var el=$(id);el.innerHTML='';
+  items.forEach(function(it){
+    var b=document.createElement('button');b.type='button';b.textContent=it[0];
+    if(it[2]!==undefined) b.dataset.size=it[2];
+    if(activeVal!==undefined&&it[1]===activeVal) b.setAttribute('aria-pressed','true');
+    b.onclick=function(){
+      Array.prototype.forEach.call(el.children,function(c){c.removeAttribute('aria-pressed')});
+      b.setAttribute('aria-pressed','true');
+      fn(it[1]);
+    };
+    el.appendChild(b);
+  });
+}
+
+function showSections(list){
+  ['qtySection','pizzaSection','breadSection','tempSection','chefPizzaSection'].forEach(function(id){
+    $(id).style.display=list.indexOf(id)>-1?(id==='tempSection'?'block':'block'):'none';
+  });
+}
+function dispatchRender(){
+  if(cur==='pizza') renderPizza();
+  else if(cur==='bread') renderBread();
+  else if(cur==='chefpizza') renderChefPizza();
+  else renderGeneric();
+}
+
+function pick(id){
+  if(id.indexOf('bread:')===0){
+    $('rs').value=id;
+    cur='bread';
+    curBread=BREADS.filter(function(x){return x.id===id.slice(6)})[0]||BREADS[0];
+    showSections(['breadSection','tempSection']);
+    $('elevSection').style.display='block';
+    $('badge').textContent=curBread.adapted?'Adapted formula — see sources card below':'Published recipe — see sources card below';
+    var savedMode='loaves',savedBCount=curBread.baseLoaves,savedBWeight='',savedTemp=70;
+    try{
+      savedMode=localStorage.getItem('bk_bmode')||'loaves';
+      savedBCount=localStorage.getItem('bk_bcount')||curBread.baseLoaves;
+      savedBWeight=localStorage.getItem('bk_bweight')||'';
+      savedTemp=+localStorage.getItem('bk_ktemp')||70;
+    }catch(e){}
+    curBMode=savedMode;
+    setChips('bmodechips',[['By loaves/pieces','loaves'],['By dough weight (g)','weight']],function(v){
+      curBMode=v;
+      $('bmode-loaves').style.display=v==='loaves'?'block':'none';
+      $('bmode-weight').style.display=v==='weight'?'block':'none';
+      renderBread();
+    },savedMode);
+    $('bmode-loaves').style.display=savedMode==='loaves'?'block':'none';
+    $('bmode-weight').style.display=savedMode==='weight'?'block':'none';
+    $('bcountlabel').textContent='How many '+(curBread.unit==='pita'?'pita':curBread.unit+'s')+'?';
+    $('bcount').value=savedBCount;
+    setChips('bcchips',[1,2,4].concat(curBread.unit==='pita'?[10,20]:[]).map(function(c){return [String(c),c]}),function(v){$('bcount').value=v;renderBread()});
+    $('bweight').value=savedBWeight;
+    $('bcount').oninput=renderBread;
+    $('bweight').oninput=renderBread;
+    setChips('tchips',[['60°F',60],['70°F',70],['78°F',78],['85°F',85]],function(v){$('ktemp').value=v;renderBread()},savedTemp);
+    $('ktemp').value=savedTemp;
+    $('ktemp').oninput=renderBread;
+    renderBread();
+    return;
+  }
+  if(id.indexOf('cp:')===0){
+    $('rs').value=id;
+    cur='chefpizza';
+    curChefPizza=CHEFPIZZA.filter(function(x){return x.id===id.slice(3)})[0]||CHEFPIZZA[0];
+    showSections(['chefPizzaSection']);
+    $('elevSection').style.display='none';
+    $('badge').textContent=curChefPizza.adapted?'Adapted — see sources card below':'Published recipe — see sources card below';
+    $('cpcountlabel').textContent='How many '+curChefPizza.size+' pizzas? (recipe makes '+curChefPizza.baseCount+')';
+    var savedCP=curChefPizza.baseCount;
+    try{savedCP=localStorage.getItem('bk_cpcount')||curChefPizza.baseCount}catch(e){}
+    $('cpcount').value=savedCP;
+    $('cpcount').oninput=renderChefPizza;
+    renderChefPizza();
+    return;
+  }
+  if(id==='pizza'){
+    $('rs').value='pizza';
+    cur='pizza';
+    showSections(['pizzaSection']);
+    $('elevSection').style.display='block';
+    var savedStyle='ny',savedIdx=2,savedCount=2;
+    try{
+      savedStyle=localStorage.getItem('bk_pstyle')||'ny';
+      savedIdx=+localStorage.getItem('bk_psizeidx');if(isNaN(savedIdx))savedIdx=2;
+      savedCount=+localStorage.getItem('bk_pcount')||2;
+    }catch(e){}
+    curPStyle=savedStyle;
+    setChips('pstylechips',Object.keys(PSTYLES).map(function(k){return [PSTYLES[k].label,k]}),function(v){
+      curPStyle=v;
+      var st=PSTYLES[v];
+      $('badge').textContent=v==='ny'?'Draft: standard baker\u2019s-percentage ratios, not bake-tested':'Draft: standard baker\u2019s-percentage ratios cross-checked against several sources, not bake-tested';
+      $('psizelabel').textContent=st.unit==='pan'?'Pan size':'Size';
+      $('pcountlabel').textContent='How many '+st.unit+'s?';
+      var dflt=Math.min(2,st.options.length-1);
+      curPSizeIdx=dflt;
+      setChips('pchips',st.options.map(function(o,i){return [o[0],i]}),function(v){curPSizeIdx=v;renderPizza()},dflt);
+      renderPizza();
+    },savedStyle);
+    // trigger initial style setup
+    var st0=PSTYLES[savedStyle];
+    $('badge').textContent=savedStyle==='ny'?'Draft: standard baker\u2019s-percentage ratios, not bake-tested':'Draft: standard baker\u2019s-percentage ratios cross-checked against several sources, not bake-tested';
+    $('psizelabel').textContent=st0.unit==='pan'?'Pan size':'Size';
+    $('pcountlabel').textContent='How many '+st0.unit+'s?';
+    if(savedIdx>st0.options.length-1) savedIdx=st0.options.length-1;
+    curPSizeIdx=savedIdx;
+    setChips('pchips',st0.options.map(function(o,i){return [o[0],i]}),function(v){curPSizeIdx=v;renderPizza()},savedIdx);
+    $('pcount').value=savedCount;
+    $('pcount').oninput=renderPizza;
+    renderPizza();
+    return;
+  }
+  cur=R.filter(function(x){return x.id===id})[0]||R[0];
+  $('rs').value=cur.id;
+  showSections(['qtySection']);
+  $('elevSection').style.display='block';
+  $('clabel').textContent='How many '+cur.u[1]+'?';
+  if(!countTouched||lastCount===null||lastCount<cur.min||lastCount>cur.max) $('count').value=cur.d;
+  else $('count').value=lastCount;
+  $('badge').textContent=cur.v?'Draft: cross-checked with published recipes, not bake-tested':'Draft: standard ratios, not yet cross-checked or bake-tested';
+  var chipItems=cur.c.map(function(c){return [c===12?'1 dozen':c===24?'2 dozen':c===36?'3 dozen':String(c),c]});
+  setChips('cchips',chipItems,function(v){$('count').value=v;countTouched=true;lastCount=v;renderGeneric()});
+  renderGeneric();
+}
+
+var groups={};R.forEach(function(x){(groups[x.group]=groups[x.group]||[]).push(x)});
+Object.keys(groups).forEach(function(g){
+  var og=document.createElement('optgroup');og.label=g;
+  groups[g].forEach(function(x){
+    var o=document.createElement('option');o.value=x.id;
+    o.textContent=x.style+(x.name&&x.name!=='Classic'?' — '+x.name:(x.name==='Classic'&&groups[x.group].filter(function(y){return y.style===x.style}).length>1?' — Classic':''));
+    og.appendChild(o);
+  });
+  $('rs').appendChild(og);
+});
+var doughGroup=Array.prototype.filter.call($('rs').querySelectorAll('optgroup'),function(g){return g.label==='Dough'})[0];
+var po=document.createElement('option');po.value='pizza';po.textContent='Pizza dough — NY, Neapolitan, or Detroit';
+if(doughGroup) doughGroup.insertBefore(po,doughGroup.firstChild); else $('rs').appendChild(po);
+
+var breadGroup=document.createElement('optgroup');breadGroup.label='Bread';
+BREADS.forEach(function(b){
+  var o=document.createElement('option');o.value='bread:'+b.id;
+  o.textContent=b.name+(b.adapted?' (adapted)':'');
+  breadGroup.appendChild(o);
+});
+$('rs').insertBefore(breadGroup,$('rs').firstChild);
+
+var cpGroup=document.createElement('optgroup');cpGroup.label='Chef & Restaurant Pizza';
+CHEFPIZZA.forEach(function(c){
+  var o=document.createElement('option');o.value='cp:'+c.id;
+  o.textContent=c.chef+(c.adapted?' (adapted)':'');
+  cpGroup.appendChild(o);
+});
+if(doughGroup) doughGroup.parentNode.insertBefore(cpGroup,doughGroup.nextSibling); else $('rs').appendChild(cpGroup);
+
+setChips('echips',[['Sea level',0],['3,000',3000],['5,000 (Prescott, AZ)',5300],['7,000',7000]],function(v){$('elev').value=v;dispatchRender()});
+$('rs').addEventListener('change',function(){pick(this.value)});
+$('count').addEventListener('input',function(){countTouched=true;lastCount=parseInt(this.value,10)||lastCount;renderGeneric()});
+$('elev').addEventListener('input',function(){dispatchRender()});
+
+var sr='bis-classic';
+try{
+  sr=localStorage.getItem('bk_r')||'bis-classic';
+  $('elev').value=localStorage.getItem('bk_ft')||'0';
+  var savedN=parseInt(localStorage.getItem('bk_n'),10);
+  if(savedN){lastCount=savedN;countTouched=true}
+}catch(e){$('elev').value='0'}
+if(sr==='pizza'||sr.indexOf('bread:')===0||sr.indexOf('cp:')===0){pick(sr)}
+else{
+  var found=R.filter(function(x){return x.id===sr})[0];
+  pick(found?sr:'bis-classic');
+}
+</script>
+</body>
+</html>
