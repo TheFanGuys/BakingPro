@@ -4,17 +4,51 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Baking Scaler</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#EDF0F2;--ink:#14212B;--card:#fff;--muted:#5B6B77;--line:#D3DADF;--accent:#E9B824;--aink:#14212B;--blue:#2F3F86;--err:#B3261E;
+:root{--bg:#12161A;--ink:#EDEFEF;--card:#1C2126;--muted:#8B959C;--line:#262D33;--accent:#E8A33D;--aink:#12161A;--blue:#4FA8A0;--err:#FF6B5E;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F171D;--ink:#E9EEF1;--card:#18242D;--muted:#93A3AE;--line:#2A3A45;--accent:#F0C443;--blue:#8C9BE8;--err:#FF9187}}
-:root[data-theme="dark"]{--bg:#0F171D;--ink:#E9EEF1;--card:#18242D;--muted:#93A3AE;--line:#2A3A45;--accent:#F0C443;--blue:#8C9BE8;--err:#FF9187}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:560px;margin:0 auto;padding:0 0 40px}
 h1{font:800 30px/1.1 Archivo,system-ui,sans-serif;margin:8px 0 12px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.screen{padding:0 16px 20px}
+.topbar{display:flex;align-items:center;gap:10px;padding:22px 0 14px;position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .wordmark{font:900 20px/1.1 Archivo;letter-spacing:.2px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#screenHome .topbar .wordmark{font-size:22px;letter-spacing:.3px}
+.backbtn{flex-shrink:0;width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 20px/1 Archivo;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.backbtn:active{background:var(--line)}
+.count-badge{font:600 11px/1 'IBM Plex Mono';color:var(--muted);letter-spacing:.4px;flex-shrink:0}
+.searchbar{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:6px}
+.searchbar input{flex:1;border:0;background:transparent;color:var(--ink);font:500 15px Archivo;outline:none;min-width:0}
+.searchbar input::placeholder{color:var(--muted)}
+.sectionlabel{font:700 11px/1 'IBM Plex Mono';color:var(--muted);letter-spacing:.5px;margin:18px 2px 8px}
+.navlist{display:flex;flex-direction:column}
+.navrow{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:15px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.navrow:active{background:var(--card)}
+.navrow:last-child{border-bottom:0}
+.nrnum{font:700 13px/1 'IBM Plex Mono';color:var(--accent);width:22px;flex-shrink:0}
+.nricon{width:38px;height:38px;flex-shrink:0;border-radius:9px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.iconbtn{flex-shrink:0;width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+.iconbtn:active{background:var(--line)}
+.iconbtn .badge-dot{position:absolute;top:-4px;right:-4px;background:var(--accent);color:var(--aink);font:700 10px/1 'IBM Plex Mono';border-radius:99px;min-width:16px;height:16px;padding:0 3px;display:flex;align-items:center;justify-content:center}
+.addlistbtn{width:100%;background:var(--accent);color:var(--aink);border:0;border-radius:11px;padding:13px;font:800 15px Archivo;cursor:pointer;margin-bottom:4px}
+.addlistbtn:active{opacity:.85}
+.shoprow{display:flex;align-items:flex-start;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line)}
+.shoprow:last-child{border-bottom:0}
+.shopmain{flex:1;min-width:0}
+.shopname{font:700 15px/1.3 Archivo}
+.shopamt{font:700 13px/1 'IBM Plex Mono';color:var(--accent);margin-top:2px}
+.shopsrc{font:500 12px/1.4 Archivo;color:var(--muted);margin-top:3px}
+.shopdel{flex-shrink:0;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--err);cursor:pointer;display:flex;align-items:center;justify-content:center;font:700 16px/1 Archivo}
+.clearlistbtn{width:100%;background:transparent;color:var(--err);border:1px solid var(--line);border-radius:11px;padding:12px;font:700 14px Archivo;cursor:pointer;margin-top:18px}
+.nrmain{flex:1;min-width:0}
+.nrtitle{font:700 16px/1.25 Archivo;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nrsub{font:500 13px/1.3 Archivo;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nrcount{font:600 12px/1 'IBM Plex Mono';color:var(--muted);flex-shrink:0}
+.nrchev{flex-shrink:0;color:var(--muted)}
 select{width:100%;font:800 18px/1.2 Archivo,system-ui,sans-serif;padding:12px;border-radius:12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);margin-bottom:8px}
 .badge{display:inline-block;font-size:13px;border:1px solid var(--blue);color:var(--blue);border-radius:99px;padding:2px 10px;margin-top:2px}
 .hero{background:var(--accent);color:var(--aink);border-radius:18px;padding:16px;margin:16px 0 12px}
@@ -38,8 +72,7 @@ td.g{text-align:right;font-weight:800;padding-left:8px;white-space:nowrap}
 td.v{text-align:right;color:var(--muted);padding-left:8px;font-size:14px}
 tr.sec td{font:800 16px Archivo,system-ui,sans-serif;padding-top:16px;color:var(--blue)}
 .chg{color:var(--blue);font-size:13px}
-.approx{color:var(--accent);filter:brightness(.6)}
-:root[data-theme="dark"] .approx,@media (prefers-color-scheme:dark){.approx{filter:none;color:var(--accent)}}
+.approx{color:var(--accent)}
 ul,ol{margin:6px 0 0;padding-left:22px}
 li{margin:5px 0}
 .note{color:var(--muted);font-size:14px;margin:10px 0 0}
@@ -53,8 +86,46 @@ summary{cursor:pointer;font-weight:500}
 </head>
 <body>
 <main>
-<h1>Baking scaler</h1>
-<select id="rs" aria-label="Choose a recipe"></select>
+
+<div id="screenHome" class="screen">
+<div class="topbar">
+<div class="wordmark">BAKING SCALER</div>
+<div class="count-badge mono" id="totalCount"></div>
+<button class="iconbtn" id="cartBtnHome" aria-label="Shopping list" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="20" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l2 12.2a2 2 0 0 0 2 1.7h8.7a2 2 0 0 0 2-1.6L21 8H6"/></svg><span class="badge-dot" id="cartDotHome" style="display:none"></span></button>
+</div>
+<div class="searchbar">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B959C" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+<label for="searchInput" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search recipes</label>
+<input id="searchInput" type="text" placeholder="Search biscuits, sourdough, pizza…" autocomplete="off">
+</div>
+<div id="searchResults" class="navlist" style="display:none"></div>
+<div id="homeBrowse">
+<div id="continueRow"></div>
+<div class="sectionlabel">BROWSE</div>
+<div id="catList" class="navlist"></div>
+</div>
+</div>
+
+<div id="screenCategory" class="screen" style="display:none">
+<div class="topbar">
+<button class="backbtn" id="catBack" aria-label="Back to home" type="button">‹</button>
+<div class="wordmark mono" id="catTitle"></div>
+<button class="iconbtn" id="cartBtnCat" aria-label="Shopping list" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="20" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l2 12.2a2 2 0 0 0 2 1.7h8.7a2 2 0 0 0 2-1.6L21 8H6"/></svg><span class="badge-dot" id="cartDotCat" style="display:none"></span></button>
+</div>
+<div id="catItemList" class="navlist"></div>
+</div>
+
+<div id="screenRecipe" class="screen" style="display:none">
+<div class="topbar">
+<button class="backbtn" id="recipeBack" aria-label="Back" type="button">‹</button>
+<div class="wordmark" id="recipeTitle"></div>
+<button class="iconbtn" id="cartBtnRecipe" aria-label="Shopping list" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="20" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l2 12.2a2 2 0 0 0 2 1.7h8.7a2 2 0 0 0 2-1.6L21 8H6"/></svg><span class="badge-dot" id="cartDotRecipe" style="display:none"></span></button>
+</div>
+
+<button type="button" class="addlistbtn" id="addToListBtn">+ Add to Shopping List</button>
+<div class="note" id="addToListFlash" style="display:none;color:var(--accent);margin:6px 2px 0"></div>
+
+<select id="rs" aria-label="Choose a recipe" style="display:none"></select>
 <span class="badge" id="badge"></span>
 
 <section class="hero" id="qtySection">
@@ -130,6 +201,18 @@ summary{cursor:pointer;font-weight:500}
 <p class="note"><b>Chef pizzas:</b> Pizzeria Bianco's dough (Chris Bianco) and Roberta's dough are both real published recipes — Bianco's from Food & Wine, Roberta's originally from NYT Cooking. Lucali's dough (Mark Iacono) is from his own published recipe via Good Morning America/ABC News — I found that the ingredient amounts as published sum to noticeably more than the stated 8×10oz portioning, so I flag that instead of quietly forcing the math to fit. The Tony Gemignani-style dough is <b>adapted</b>: his linked article is home-oven shopping and technique guidance (flour choice, diastatic malt, the two-steel method), not a numbered formula, so the percentages here follow the same range he describes for high-protein home-oven dough rather than his exact published figures.</p>
 <p class="note">For any pizza flour, "unbleached" alone doesn't mean unenriched — check the ingredient label on the specific bag you buy for added niacin, iron, thiamine, riboflavin, or folic acid, which mean it's enriched.</p>
 </details>
+
+</div>
+
+<div id="screenShopping" class="screen" style="display:none">
+<div class="topbar">
+<button class="backbtn" id="shopBack" aria-label="Back" type="button">‹</button>
+<div class="wordmark">SHOPPING LIST</div>
+</div>
+<div id="shopEmpty" class="note" style="display:none;padding:20px 2px">Nothing here yet. Open a recipe, scale it to what you need, then tap "Add to Shopping List."</div>
+<div id="shopList"></div>
+<button type="button" class="clearlistbtn" id="clearListBtn" style="display:none">Clear shopping list</button>
+</div>
 </main>
 
 <script>
@@ -156,6 +239,42 @@ var R=[
 {id:'pan',group:'Quick breads',style:'Pancakes',name:'Buttermilk',u:['pancake','pancakes'],b:8,c:[4,8,12,24],d:8,min:1,max:96,k:'q',cut:['bp','soda'],lq:[1,2],li:'milk',ov:0,
  ing:[['flour','All-purpose flour',190,'g',FL],['sugar','Sugar',12,'g',SG],['bp','Baking powder',4,'g',BP],['soda','Baking soda',2.5,'g',SO],['salt','Fine salt',3,'g',SA],['egg','Egg',50,'g','egg'],['milk','Buttermilk',295,'ml',LQ],['butter','Melted butter',42,'g',BU]],
  st:['Whisk flour, sugar, baking powder, baking soda, and salt.','Whisk the egg, buttermilk, and melted butter. Stir into the dry mix. Lumps are fine.','Rest 5 minutes. Heat a griddle to medium, about 375°F.','Pour 1/4 cup per pancake. Flip when bubbles pop and edges look set, about 2 minutes. Cook 1 to 2 minutes more.']},
+{id:'pan-regular',group:'Quick breads',style:'Pancakes',name:'Classic, with regular milk',u:['pancake','pancakes'],b:8,c:[4,8,12,24],d:8,min:1,max:96,k:'q',cut:['bp'],lq:[1,2],li:'milk',ov:0,
+ ing:[['flour','All-purpose flour',140,'g',FL],['sugar','Sugar',25,'g',SG],['bp','Baking powder',6,'g',BP],['salt','Salt',1.5,'g',SA],['egg','Egg',50,'g','egg'],['milk','Milk (regular, not buttermilk)',240,'g',LQ],['butter','Melted butter',30,'g',BU],['vanilla','Vanilla extract',5,'g',LQ]],
+ st:['Whisk the flour, sugar, baking powder, and salt.','In a separate bowl, whisk the egg, milk, melted butter, and vanilla.','Pour the wet into the dry and stir just until combined. A few lumps are fine; don\u2019t overmix.','Heat a griddle to medium, about 375°F, and grease lightly.','Pour 1/4 cup per pancake. Flip when bubbles form on top and the bottom is golden, about 1 to 2 minutes. Cook 1 to 2 minutes more.'],
+ nt:'This is the standard ratio for a milk-based (non-buttermilk) pancake \u2014 no baking soda needed, since there\u2019s no buttermilk acidity to react with. It\u2019s a widely converged-on classic rather than one I\u2019m crediting to a single named source. If you only have buttermilk on hand, use the Buttermilk Pancakes recipe instead rather than substituting here \u2014 the leavening is set up differently for each.'},
+{id:'waffle-buttermilk-ka',group:'Quick breads',style:'Waffles',name:'King Arthur Buttermilk',u:['waffle','waffles'],b:5,c:[4,5,10],d:5,min:1,max:40,k:'q',cut:['bp','soda'],lq:[1,2],li:'milk',ov:0,
+ ing:[['flour','All-purpose flour',206,'g',FL],['bp','Baking powder',8,'g',BP],['soda','Baking soda',5,'g',SO],['salt','Salt',6,'g',SA],['sugar','Sugar',25,'g',SG],['egg','Large eggs',100,'g','egg'],['milk','Buttermilk',397,'ml',LQ],['butter','Melted butter',113,'g',BU],['vanilla','Vanilla extract',10,'g',LQ]],
+ st:['Beat the eggs, buttermilk, melted butter, and vanilla together.','In a separate bowl, whisk the flour, sugar, baking powder, baking soda, and salt.','Combine wet and dry, stirring just until nearly smooth. A few small lumps are fine.','Preheat and grease the waffle iron. Use about 1/3 cup batter per waffle on a standard iron.','Cook until the iron stops steaming, about 2 to 3 minutes.'],
+ nt:'Published recipe — King Arthur Baking\u2019s Classic Buttermilk Waffles.'},
+{id:'waffle-belgian-ka',group:'Quick breads',style:'Waffles',name:'King Arthur Belgian-Style Yeast',u:['waffle','waffles'],b:4,c:[4,8,12],d:4,min:1,max:24,k:'n',
+ ing:[['flour','All-purpose flour',240,'g',FL],['milk','Milk, lukewarm',340,'ml',LQ],['butter','Butter, melted',85,'g',BU],['syrup','Maple syrup (optional)',48,'g',LQ],['salt','Salt',4,'g',SA],['vanilla','Vanilla extract',5,'g',LQ],['egg','Large eggs',100,'g','egg'],['yeast','Instant yeast',4.5,'g',.32]],
+ st:['Combine everything in a large bowl, leaving room for expansion — it will bubble and grow.','Stir until combined; it doesn\u2019t need to be perfectly smooth.','Cover and rest at room temperature 1 hour, until bubbling. Cook now, or refrigerate up to overnight for deeper flavor.','Preheat and grease the waffle iron. Pour batter onto the center and cook per the manufacturer\u2019s directions, about 5 to 6 minutes for a deep-pocket Belgian iron.'],
+ nt:'Published recipe — King Arthur Baking\u2019s Belgian-Style Yeast Waffles. King Arthur\u2019s own tip for same-day waffles: add 1.5 tsp baking powder along with the yeast and rest just 30 minutes instead of overnight.',an:'No numeric altitude cut here — this is yeast-leavened, not baking powder. Dough/batter rises faster above 3,000 ft; if resting overnight, check it a bit earlier than usual.'},
+{id:'gf-biscuits',group:'Gluten-Free',style:'Biscuits',name:'Buttermilk (1:1 GF flour)',u:['biscuit','biscuits'],b:8,c:[4,8,12,16],d:8,min:1,max:64,k:'n',v:1,
+ ing:[['flour','Gluten-free 1:1 baking flour (Bob\u2019s Red Mill, Cup4Cup, or King Arthur Measure for Measure \u2014 check the bag; most 1:1 GF blends are fortified/enriched, same as enriched wheat flour)',444,'g',FL],['bp','Baking powder',16,'g',BP],['soda','Baking soda',1,'g',SO],['salt','Fine salt',7,'g',SA],['butter','Cold unsalted butter',113,'g',BU],['milk','Cold buttermilk',284,'ml',LQ]],
+ st:['Heat the oven to 425°F. Line a baking sheet with parchment.','Whisk the GF flour, baking powder, baking soda, and salt.','Cut in the cold butter until pea-sized crumbs remain.','Stir in the cold buttermilk to a shaggy, somewhat sticky dough \u2014 gluten-free dough is wetter than wheat dough; resist adding extra flour.','Pat to 3/4 inch thick on a lightly GF-floured surface. Cut straight down, no twisting.','Bake 18 to 20 minutes until browned. Gluten-free biscuits benefit from a few minutes\u2019 rest after cutting, letting the starches set, before they go in the oven.'],
+ nt:'Published ratio, cross-checked across several gluten-free baking sites, all converging on roughly this flour-to-fat-to-liquid balance for a 1:1 GF blend. No altitude adjustment here \u2014 the baking-powder cuts used elsewhere in this app were calibrated for wheat flour\u2019s behavior, and there isn\u2019t solid published guidance yet for how GF starches respond at altitude, so I\u2019m not guessing at a number.',an:'No altitude adjustment \u2014 not enough reliable data for gluten-free flour specifically to extend the wheat-flour formula here.'},
+{id:'gf-bread',group:'Gluten-Free',style:'Sandwich Bread',name:'Yeasted (King Arthur GF recipe)',u:['loaf','loaves'],b:1,c:[1,2],d:1,min:1,max:4,k:'n',v:1,
+ ing:[['flour','King Arthur Gluten-Free All-Purpose Flour (this specific flour is fortified/enriched \u2014 see note)',444,'g',FL],['sugar','Sugar',37,'g',SG],['yeast','Instant yeast',6,'g',.32],['salt','Salt',7.5,'g',SA],['xan','Xanthan gum',3,'g',.42],['milk','Warm milk',240,'ml',LQ],['butter','Butter, melted',57,'g',BU],['egg','Large eggs',150,'g','egg']],
+ st:['Grease an 8.5x4.5" loaf pan (or a 9x4x4" GF loaf pan for a taller shape).','Whisk the flour, sugar, yeast, salt, and xanthan gum together.','With a mixer, drizzle in the warm milk, beating constantly \u2014 it will look crumbly at first, then come together.','Beat in the melted butter, then the eggs one at a time, beating well after each.','Scrape the bowl and beat on high 3 minutes to build structure \u2014 this batter is beaten, not kneaded.','Spread into the pan, domed in the middle like a traditional loaf, and let rise until it crests the pan.','Bake 38 to 42 minutes until deep golden. I don\u2019t have a confirmed oven temperature from the source for this step \u2014 350°F is the standard King Arthur bake temp for similar GF loaves, but confirm before relying on it.'],
+ nt:'Published recipe \u2014 King Arthur\u2019s "Gluten-Free Sandwich Bread." The flour it calls for is fortified with iron, calcium, and vitamin B (listed on the bag) \u2014 same category of enrichment as enriched wheat flour, just applied to a gluten-free blend. King Arthur also sells a separate Gluten-Free Bread Flour with no added vitamin/mineral blend on its ingredient list, marketed as a 1:1 sub for wheat flour in bread recipes (their own guidance: add 2 to 3 tbsp more liquid per cup, and expect the dough to rise about 50% faster). I don\u2019t have a complete, verified recipe written specifically for that unenriched flour to give you numbers for \u2014 what I found was missing the water amount \u2014 so that swap is yours to test, not something I can hand you pre-measured.'},
+{id:'cc-cookies',group:'Cookies',style:'Chocolate Chip Cookies',name:'Jacques Torres / NYT-style',u:['cookie','cookies'],b:18,c:[12,18,24,36],d:18,min:1,max:72,k:'n',v:1,
+ ing:[['cakeflour','Cake flour',241,'g',FL],['breadflour','Bread flour (check label \u2014 verify unenriched)',241,'g',FL],['soda','Baking soda',6,'g',SO],['bp','Baking powder',7,'g',BP],['salt','Coarse salt',9,'g',SA],['butter','Unsalted butter, room temperature',283,'g',BU],['brown','Light brown sugar, packed',284,'g',SG],['sugar','Granulated sugar',227,'g',SG],['egg','Large eggs',100,'g','egg'],['vanilla','Vanilla extract',10,'g',LQ],['choc','Bittersweet chocolate discs or chunks, 60%+ cacao',567,'g',0]],
+ st:['Sift the cake flour, bread flour, baking soda, baking powder, and salt together.','Cream the butter with both sugars until light and fluffy, about 5 minutes.','Beat in the eggs one at a time, then the vanilla.','Mix in the flour mixture just until combined, then fold in the chocolate.','Press plastic wrap onto the dough and chill 24 to 72 hours \u2014 this rest is what the original recipe is built around, not an optional step.','Scoop into balls (about 55g each for standard cookies, or 100g for the bakery-style extra-large version), leaving room to spread. Sprinkle with flaky sea salt.','Bake at 350°F for 18 to 20 minutes until golden but still soft in the center.'],
+ nt:'Published recipe \u2014 Jacques Torres\u2019s chocolate chip cookie from his NYC shop, the one at the center of The New York Times\u2019 well-known 2008 chocolate chip cookie search, as reproduced with full gram amounts by Tasting Table. The base count here (18 standard cookies) is my own sizing from the total dough weight; the original recipe itself is written as five extra-large 6-ounce cookies from the same dough. No altitude adjustment \u2014 I don\u2019t have verified altitude guidance for this specific recipe, though the general cookie rule of thumb at high elevation is a touch less sugar and a touch more flour, which isn\u2019t something I\u2019ll bake into these numbers without a tested source.',an:'No altitude adjustment for this recipe specifically.'},
+{id:'oatmeal-raisin',group:'Cookies',style:'Oatmeal Raisin Cookies',name:'Quaker\u2019s Vanishing',u:['cookie','cookies'],b:48,c:[24,48,72],d:48,min:1,max:96,k:'n',v:1,
+ ing:[['butter','Unsalted butter, softened',196,'g',BU],['brown','Brown sugar, packed',160,'g',SG],['sugar','Granulated sugar',100,'g',SG],['egg','Large eggs',100,'g','egg'],['vanilla','Vanilla extract',5,'g',LQ],['flour','All-purpose flour (check label \u2014 verify unenriched)',180,'g',FL],['soda','Baking soda',5,'g',SO],['cinn','Ground cinnamon',2,'g',1],['salt','Salt',3,'g',SA],['oats','Old-fashioned rolled oats',240,'g',0],['raisins','Raisins',145,'g',0]],
+ st:['Preheat the oven to 350°F.','Beat the butter and both sugars until creamy.','Beat in the eggs and vanilla.','Whisk the flour, baking soda, cinnamon, and salt in a separate bowl, then mix into the butter mixture.','Stir in the oats and raisins.','Drop by rounded tablespoons onto ungreased cookie sheets.','Bake 8 to 10 minutes until light golden. Cool 1 minute on the sheet before moving to a rack.'],
+ nt:'Published recipe \u2014 Quaker Oats\u2019 "Vanishing Oatmeal Raisin Cookies," long printed right on the oats canister.',an:'Quaker\u2019s own high-altitude note for this recipe: at altitude, increase the flour to 1\u00be cups (210g) and bake as directed \u2014 no other change needed. That\u2019s their guidance, not a formula I\u2019m extending myself.'},
+{id:'snickerdoodle-ka',group:'Cookies',style:'Snickerdoodles',name:'King Arthur Buttery',u:['cookie','cookies'],b:20,c:[10,20,40],d:20,min:1,max:80,k:'n',v:1,
+ ing:[['butter','Unsalted butter, room temperature',113,'g',BU],['sugar','Granulated sugar',149,'g',SG],['egg','Large egg',50,'g','egg'],['vanilla','Vanilla extract',5,'g',LQ],['bp','Baking powder',4,'g',BP],['salt','Salt',3,'g',SA],['flour','Bread flour or all-purpose flour (check label \u2014 verify unenriched)',160,'g',FL],['csugar','Granulated sugar (for the coating)',25,'g',SG],['cinn','Ground cinnamon (for the coating)',3,'g',.4]],
+ st:['Preheat the oven to 375°F. Line two baking sheets with parchment.','Beat the butter and sugar until smooth. Beat in the egg, then the vanilla, salt, and baking powder.','Mix in the flour until fully incorporated.','Shake the coating sugar and cinnamon together in a bag. Roll each ball of dough in it until fully coated.','Space at least 1.5 inches apart on the sheets.','Bake 8 minutes for soft cookies, 10 for crunchier ones.'],
+ nt:'Published recipe \u2014 King Arthur Baking\u2019s "Buttery Snickerdoodles."'},
+{id:'pb-cookies-ka',group:'Cookies',style:'Peanut Butter Cookies',name:'King Arthur Classic',u:['cookie','cookies'],b:48,c:[24,48,72],d:48,min:1,max:96,k:'n',v:1,
+ ing:[['short','Vegetable shortening',190,'g',BU],['sugar','Granulated sugar',200,'g',SG],['brown','Brown sugar, packed',220,'g',SG],['egg','Large eggs',100,'g','egg'],['vanilla','Vanilla extract',5,'g',LQ],['pb','Smooth peanut butter (supermarket-style, not natural)',258,'g',BU],['flour','All-purpose flour (check label \u2014 verify unenriched)',360,'g',FL],['soda','Baking soda',10,'g',SO],['salt','Salt',3,'g',SA]],
+ st:['Preheat the oven to 350°F.','Beat the shortening, both sugars, eggs, vanilla, and peanut butter together until smooth.','Sift the flour, baking soda, and salt together, then stir into the peanut butter mixture.','Drop by spoonfuls onto an ungreased baking sheet.','Press down with a fork in a crisscross pattern.','Bake about 10 minutes, until lightly browned.'],
+ nt:'Published recipe \u2014 King Arthur Baking\u2019s classic peanut butter cookie, from "The King Arthur Baking Company All-Purpose Baker\u2019s Companion."'},
 {id:'ftor',group:'Tortillas and noodles',style:'Tortillas',name:'Flour',u:['tortilla','tortillas'],b:8,c:[4,8,12,24],d:8,min:1,max:96,k:'n',
  ing:[['flour','All-purpose flour',250,'g',FL],['bp','Baking powder',4,'g',BP],['salt','Fine salt',6,'g',SA],['fat','Lard or shortening',45,'g',.23],['water','Warm water',180,'ml',LQ]],
  st:['Whisk flour, baking powder, and salt. Rub in the fat with your fingers.','Add warm water and knead 2 minutes until smooth. Cover and rest 20 minutes.','Divide into balls of about {BALL} g each. Rest 10 minutes.','Roll each to a thin 8 inch round.','Cook in a dry skillet on medium-high, about 30 seconds per side, until spotted and puffy. Keep warm in a towel.'],an:'Altitude changes little here. Dry air stiffens the dough, so keep it covered.'},
@@ -173,7 +292,59 @@ var R=[
 {id:'pie',group:'Dough',style:'Pie crust',name:'Classic',u:['crust','crusts'],b:1,c:[1,2,3,4],d:1,min:1,max:8,k:'n',
  ing:[['flour','All-purpose flour',150,'g',FL],['sugar','Sugar',6,'g',SG],['salt','Fine salt',3,'g',SA],['butter','Cold butter',105,'g',BU],['water','Ice water',50,'ml',LQ]],
  st:['Whisk flour, sugar, and salt. Cut in the cold butter until pea-size and almond-size pieces remain.','Sprinkle in the ice water. Toss until it just holds when squeezed. Add water 1 teaspoon at a time if needed.','Shape into a disk, wrap, and chill at least 1 hour.','Roll out to about 12 inches and 1/8 inch thick. Bake following your pie recipe.'],an:'No proven altitude rule for pie crust. Dry air may need a little extra water, added by the teaspoon.'},
-{id:'gravy',group:'Sides',style:'Sausage gravy',name:'Classic',u:['serving','servings'],b:6,c:[2,4,6,12],d:6,min:1,max:30,k:'n',
+{id:'pie-apple',group:'Pies',style:'Apple',name:'King Arthur-style, with crumb topping',u:['9-inch pie','9-inch pies'],b:1,c:[1,2],d:1,min:1,max:4,k:'n',v:1,
+ ing:[['apple','Peeled, sliced apples (about 8 to 9 medium)',907,'g',0],['sugar','Granulated sugar',149,'g',SG],['flour','All-purpose flour',30,'g',FL],['cinn','Ground cinnamon',4,'g',.4],['nutmeg','Ground nutmeg',1,'g',.4],['tflour','All-purpose flour (topping)',120,'g',FL],['tbrown','Brown sugar, packed (topping)',92,'g',SG],['tbutter','Cold unsalted butter, cubed (topping)',113,'g',BU]],
+ st:['Toss the sliced apples with the sugar, flour, cinnamon, and nutmeg.','Mound into an unbaked 9" pie crust.','For the topping, work the cold butter into the flour and brown sugar with your fingers until clumpy and crumbly.','Scatter the topping evenly over the apples.','Bake at 425°F for 15 minutes, then reduce to 350°F and bake 30 to 35 minutes more, until the filling bubbles and the top is golden.'],
+ nt:'Published recipe \u2014 King Arthur Baking\u2019s Dutch Apple Pie filling and crumb topping. Pairs with the Pie Crust recipe above for the bottom crust; no top crust needed, this style uses a crumb top instead.'},
+{id:'pie-cherry',group:'Pies',style:'Cherry',name:'America\u2019s Test Kitchen-style, fresh tart cherry',u:['9-inch pie','9-inch pies'],b:1,c:[1,2],d:1,min:1,max:4,k:'n',v:1,
+ ing:[['cherry','Fresh tart cherries, pitted (about 2.5 lb)',1134,'g',0],['sugar','Granulated sugar',149,'g',SG],['corn','Cornstarch',28,'g',.37],['lemon','Lemon juice',30,'g',LQ],['almond','Almond extract',2,'g',LQ],['salt','Salt',3,'g',SA]],
+ st:['Toss the cherries with half the sugar; let sit 30 minutes to draw out juice.','Drain 2 tablespoons of the released juice and whisk it with the cornstarch to make a slurry.','Combine the remaining sugar and the salt with the cherries and their juice in a saucepan; bring to a simmer.','Stir in the cornstarch slurry and simmer until thickened and glossy.','Off the heat, stir in the almond extract and lemon juice. Cool slightly.','Pour into an unbaked 9" pie crust, add a lattice or crumb top, and bake at 375°F for 45 to 50 minutes, until bubbling.'],
+ nt:'Published recipe \u2014 America\u2019s Test Kitchen\u2019s Fresh Tart Cherry Crumb Pie filling.'},
+{id:'pie-pecan',group:'Pies',style:'Pecan',name:'Karo Classic',u:['9-inch pie','9-inch pies'],b:1,c:[1,2],d:1,min:1,max:4,k:'n',v:1,
+ ing:[['syrup','Light or dark corn syrup',328,'g',LQ],['egg','Large eggs',150,'g','egg'],['sugar','Granulated sugar',200,'g',SG],['butter','Unsalted butter, melted',28,'g',BU],['vanilla','Vanilla extract',5,'g',LQ],['pecan','Pecans',170,'g',0]],
+ st:['Mix the corn syrup, eggs, sugar, melted butter, and vanilla with a spoon.','Stir in the pecans.','Pour into an unbaked 9" deep-dish pie crust.','Bake at 350°F for 60 to 70 minutes. It\u2019s done when the center reaches 200°F and springs back when tapped; cover the edges with foil if they brown too fast.','Cool at least 2 hours before slicing.'],
+ nt:'Published recipe \u2014 the Karo corn syrup bottle\u2019s "Classic Pecan Pie," about as close to the standard American pecan pie as it gets.',an:'Karo\u2019s own high-altitude adjustment for this recipe: reduce the sugar to \u2154 cup (133g), increase the butter to 3 tbsp (43g), and bake at 325°F instead of 350°F. That\u2019s their tested guidance, not a formula I\u2019m extending myself.'},
+{id:'pie-keylime',group:'Pies',style:'Key Lime',name:'Classic, with condensed milk',u:['9-inch pie','9-inch pies'],b:1,c:[1,2],d:1,min:1,max:4,k:'n',
+ ing:[['crumb','Graham cracker crumbs (crust)',170,'g',0],['csugar','Granulated sugar (crust)',50,'g',SG],['cbutter','Unsalted butter, melted (crust)',57,'g',BU],['milk','Sweetened condensed milk (one 14oz can)',396,'g',LQ],['egg','Egg yolks (about 3)',56,'g',0],['lime','Key lime juice',120,'g',LQ],['ewhite','Egg whites, about 3 (for optional meringue)',100,'g',0],['tartar','Cream of tartar (for meringue)',1,'g',.33],['msugar','Sugar (for meringue)',50,'g',SG]],
+ st:['For the crust, mix the graham crumbs, sugar, and melted butter; press into a 9" pie pan. Bake at 350°F for 8 to 10 minutes, then cool.','Beat the egg yolks until thick and pale. Beat in the condensed milk.','Slowly beat in the lime juice and continue until the mixture is very thick.','Pour into the cooled crust.','For a no-bake finish, chill at least 3 hours and serve plain or with whipped cream. For a meringue top, beat the egg whites with the cream of tartar to soft peaks, gradually beat in the sugar to stiff peaks, spread over the filling sealing to the crust, and bake at 350°F for 10 to 15 minutes until golden, then chill.'],
+ nt:'This is the standard classic ratio (one can condensed milk, egg yolks, about 1/2 cup lime juice) that shows up consistently across many published versions \u2014 community cookbooks, bottled-lime-juice labels, and others all converge on close to this. I don\u2019t have one single named original publisher to point to for it, so I\u2019m presenting it as the broadly standard classic rather than crediting one source.'},
+{id:'pie-lemonmeringue',group:'Pies',style:'Lemon Meringue',name:'King Arthur Classic',u:['9-inch pie','9-inch pies'],b:1,c:[1,2],d:1,min:1,max:4,k:'n',v:1,
+ ing:[['sugar','Granulated sugar',298,'g',SG],['corn','Cornstarch',53,'g',.37],['water','Cold water',355,'g',LQ],['egg','Large egg yolks, about 3',56,'g',0],['butter','Butter',43,'g',BU],['lemonjuice','Lemon juice (juice of about 2 lemons, plus zest of 1)',113,'g',LQ],['vanilla','Vanilla extract',2.5,'g',LQ],['ewhite','Large egg whites, about 3 (for meringue)',100,'g',0],['tartar','Cream of tartar',1,'g',.33],['msugar','Sugar (for meringue)',68,'g',SG],['mvanilla','Vanilla extract (for meringue)',5,'g',LQ]],
+ st:['Whisk the sugar and cornstarch together in a saucepan. Gradually whisk in the water.','Cook over medium heat, stirring, until thick and bubbling.','Temper the egg yolks with a little of the hot mixture, then stir the yolks back into the pan. Cook 1 to 2 minutes more.','Off the heat, stir in the butter, lemon zest, lemon juice, and vanilla.','Pour into a fully baked 9" pie crust.','For the meringue, beat the egg whites with the cream of tartar to soft peaks, then gradually beat in the sugar and vanilla to stiff, glossy peaks.','Spread the meringue over the hot filling, sealing it to the crust edge. Bake at 350°F for 10 to 12 minutes until golden. Cool, then chill before slicing.'],
+ nt:'Published recipe \u2014 King Arthur Baking\u2019s Classic Lemon Meringue Pie. Needs a fully baked (blind-baked) crust first, unlike the other pies here.'},
+{id:'sauce-nocook-atk',group:'Sauces & Gravy',style:'No-Cook Pizza Sauce',name:'America\u2019s Test Kitchen',u:['pizza\u2019s worth','pizzas\u2019 worth'],b:2,c:[1,2,4],d:2,min:1,max:12,k:'n',v:1,
+ ing:[['tom','Whole peeled tomatoes, drained (juice reserved)',784,'g',LQ],['oil','Olive oil',14,'g',LQ],['vin','Red wine vinegar',5,'g',LQ],['garlic','Garlic cloves, minced',6,'g',.33],['oreg','Dried oregano',1,'g',1],['salt','Salt, to taste',3,'g',SA]],
+ st:['Put the drained tomatoes, oil, vinegar, garlic, and oregano in a food processor; pulse until smooth, about 30 seconds.','Thin with the reserved tomato juice until the sauce measures about 2 cups per batch.','Season with salt to taste.','Use uncooked — the tomatoes are already cooked in the can, and the oven finishes the job.'],
+ nt:'Published recipe (America\u2019s Test Kitchen, "No-Cook Pizza Sauce"). Keeps a week refrigerated, or freezes up to a month.',an:'No altitude adjustment — this isn\u2019t leavened.',url:'https://www.americastestkitchen.com/recipes/10421-no-cook-pizza-sauce'},
+{id:'sauce-nocook-reinhart',group:'Sauces & Gravy',style:'No-Cook Pizza Sauce',name:'Peter Reinhart-style',u:['pizza\u2019s worth','pizzas\u2019 worth'],b:5,c:[2,4,5,8],d:5,min:1,max:20,k:'n',v:1,
+ ing:[['tom','Crushed or ground tomatoes',784,'g',LQ],['salt','Salt',6,'g',SA],['pep','Black pepper',0.7,'g',.5],['basil','Dried basil (optional)',1,'g',1],['oreg','Dried oregano (optional)',1,'g',1],['garlic','Granulated garlic (or 5 fresh cloves, minced)',9,'g',.33]],
+ st:['Stir everything together in a bowl. Add the salt gradually, tasting as you go.','Do not cook this sauce — the canned tomatoes are already cooked, and baking will cook it again.','The herb and garlic flavor intensifies as it bakes, so go easy on quantities.','Refrigerate up to a week; it\u2019s enough for 4 to 6 pizzas.'],
+ nt:'Published recipe from Peter Reinhart\u2019s "Perfect Pan Pizza" (Ten Speed Press, 2019) — numbers as reproduced with permission by Saveur and Forno Bravo.',an:'No altitude adjustment — this isn\u2019t leavened.',url:'https://www.saveur.com/easy-pizza-sauce-recipe/'},
+{id:'sauce-bianco',group:'Sauces & Gravy',style:'No-Cook Pizza Sauce',name:'Chris Bianco-style',u:['pizza\u2019s worth','pizzas\u2019 worth'],b:3,c:[1,2,3,6],d:3,min:1,max:12,k:'n',v:1,
+ ing:[['tom','Whole peeled tomatoes, hand-crushed',784,'g',LQ],['oil','Extra-virgin olive oil',28,'g',LQ],['basil','Fresh basil leaves, bruised',3,'g',1],['salt','Salt, to taste (go light — good canned tomatoes are often already seasoned)',2,'g',SA],['pep','Black pepper (optional)',0.3,'g',.5]],
+ st:['Crush the whole tomatoes by hand into rough, pea-sized pieces — don\u2019t puree them.','Stir in the olive oil and bruised basil leaves.','Season lightly with salt and pepper, if using.','Let it sit at room temperature about 30 minutes so the basil and oil flavor the tomatoes before using, uncooked, on the pizza.'],
+ nt:'Published — Chris Bianco (Pizzeria Bianco) described this method directly in a Tasting Table interview: whole peeled tomatoes, a little olive oil, bruised basil, salt, rested 30 minutes, never cooked. Pairs with the Pizzeria Bianco dough above.',an:'No altitude adjustment — this isn\u2019t leavened.',url:'https://www.tastingtable.com/1003481/chris-bianco-talks-life-love-and-pizza-exclusive-interview/'},
+{id:'sauce-conant',group:'Sauces & Gravy',style:'Pasta Sauce',name:'Scott Conant-style Spaghetti al Pomodoro',u:['serving','servings'],b:5,c:[4,5,6,10],d:5,min:1,max:30,k:'n',v:1,
+ ing:[['tom','Whole peeled tomatoes (fresh, peeled and seeded, or canned)',1600,'g',LQ],['oil','Extra-virgin olive oil',73,'g',LQ],['pep','Crushed red pepper, a pinch',0.5,'g',.5],['salt','Salt',6,'g',SA],['bpep','Black pepper',1,'g',.5],['basil','Fresh basil leaves, torn',2,'g',1]],
+ st:['Heat the olive oil in a wide pan over medium-high heat until shimmering.','Add the tomatoes (crushed by hand if using canned), salt, black pepper, and red pepper flakes.','Simmer, breaking up the tomatoes with a potato masher or spoon, 20 to 25 minutes, until thickened.','Finish with torn basil just before tossing with the pasta.'],
+ nt:'Published recipe — Scott Conant\u2019s "Spaghetti with Fresh Tomato Sauce and Basil," from his restaurant background (L\u2019Impero/Scarpetta), as reproduced by Food Network and ABC News. The original calls for fresh plum tomatoes, peeled and seeded; canned whole peeled tomatoes are a common substitute noted by people who\u2019ve made it.',an:'No altitude adjustment — this isn\u2019t leavened.',url:'https://abcnews.com/amp/abcnewsnow/ChefsTable/story?id=7691131'},
+{id:'sauce-alfredo-cream',group:'Sauces & Gravy',style:'Alfredo',name:'American-style (with cream)',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:20,k:'n',
+ ing:[['pasta','Fettuccine (fresh or dried)',454,'g',0],['butter','Unsalted butter',113,'g',BU],['cream','Heavy cream',420,'g',LQ],['garlic','Garlic, minced (optional)',6,'g',.33],['parm','Parmesan, finely grated',125,'g',.48],['salt','Salt',2,'g',SA],['pep','Black pepper',1,'g',.5]],
+ st:['Cook the fettuccine in well-salted water until just done; reserve some pasta water, then drain.','Melt the butter in a large skillet over medium-low heat. Add the garlic, if using, and cook briefly until fragrant.','Pour in the cream and simmer gently 3 to 5 minutes until it thickens slightly.','Whisk in the parmesan until melted and smooth, thinning with pasta water as needed.','Toss with the hot pasta, season with salt and pepper, and serve right away.'],
+ nt:'Adapted — a standard American-style Alfredo built from the common ratio across published home-cook versions (butter, cream, parmesan). This is the richer, cream-based dish most people in the US know as "Alfredo" — a different, later preparation from the original above, not a more "correct" version of it.',an:'No altitude adjustment — this isn\u2019t leavened.'},
+{id:'sauce-hazan',group:'Sauces & Gravy',style:'Pasta Sauce',name:'Marcella Hazan\u2019s Tomato, Butter & Onion',u:['serving','servings'],b:5,c:[4,5,6,10],d:5,min:1,max:30,k:'n',v:1,
+ ing:[['tom','Canned whole peeled tomatoes, with juice, cut up',784,'g',LQ],['butter','Unsalted butter',71,'g',BU],['onion','Onion, peeled and halved (discarded before serving)',150,'g',0],['salt','Salt, to taste',3,'g',SA]],
+ st:['Put the tomatoes, butter, onion halves, and a pinch of salt in a saucepan.','Simmer uncovered, very gently, about 45 minutes, until the fat separates and floats free of the tomato.','Stir occasionally, mashing big tomato pieces against the pot.','Discard the onion. Taste and adjust salt before tossing with pasta.'],
+ nt:'Published recipe — Marcella Hazan\u2019s famous tomato sauce from "Essentials of Classic Italian Cooking" (1992). Enough for about 1 to 1.5 lb of pasta.',an:'No altitude adjustment — this isn\u2019t leavened.',url:'https://www.pbs.org/food/recipes/marcella-hazans-tomato-sauce-with-onion-and-butter'},
+{id:'sauce-simmered-marinara',group:'Sauces & Gravy',style:'Pasta Sauce',name:'Simmered Garlic Marinara',u:['serving','servings'],b:5,c:[4,5,6,10],d:5,min:1,max:30,k:'n',
+ ing:[['oil','Olive oil',30,'g',LQ],['garlic','Garlic cloves, minced',12,'g',.33],['tom','Crushed tomatoes',794,'g',LQ],['salt','Salt',6,'g',SA],['oreg','Dried oregano',2,'g',1],['sugar','Sugar (if the tomatoes taste acidic)',4,'g',SG],['basil','Fresh basil, torn, added at the end',5,'g',1]],
+ st:['Warm the olive oil over medium-low heat. Add the garlic and cook just until fragrant, about 30 seconds — don\u2019t let it brown.','Add the tomatoes, salt, oregano, and sugar if using.','Simmer uncovered 25 to 30 minutes, stirring occasionally, until thickened.','Stir in the fresh basil off the heat just before serving.'],
+ nt:'Adapted — my own formula using standard marinara ratios and technique, not tied to one named source. A thicker, more cooked style than the no-cook pizza sauces above; works on pasta or as a heartier pizza sauce.',an:'No altitude adjustment — this isn\u2019t leavened.'},
+{id:'sauce-alfredo',group:'Sauces & Gravy',style:'Alfredo',name:'Original (Alfredo di Lelio, no cream)',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:20,k:'n',v:1,
+ ing:[['pasta','Fettuccine (fresh or dried)',454,'g',0],['butter','Unsalted butter, at room temperature',227,'g',BU],['parm','Parmigiano-Reggiano, finely grated',250,'g',.48],['pep','Black pepper, to taste',1,'g',.5]],
+ st:['Cook the fettuccine in well-salted water until just done. Reserve about a cup of the pasta water before draining.','Put the room-temperature butter in a warmed serving bowl.','Add the hot, drained pasta straight to the bowl along with a splash of the hot pasta water.','Add the parmesan gradually, tossing vigorously (two forks or tongs) until it melts into a creamy sauce, adding more hot pasta water as needed.','Finish with black pepper and serve immediately.'],
+ nt:'The historical original recipe, as documented from Alfredo di Lelio\u2019s Rome restaurant (c. 1908) — just pasta, butter, and Parmesan, emulsified with starchy pasta water. No cream, no garlic. The American "Alfredo sauce" most people know adds 1 to 1.5 cups heavy cream — a later, different dish, not this one.',an:'No altitude adjustment — this isn\u2019t leavened.',url:'https://www.today.com/food/original-fettuccine-alfredo-recipe-doesnt-have-any-cream-here-t173206'},
+{id:'gravy',group:'Sauces & Gravy',style:'Sausage Gravy',name:'Classic',u:['serving','servings'],b:6,c:[2,4,6,12],d:6,min:1,max:30,k:'n',
  ing:[['saus','Breakfast sausage',454,'g',0],['flour','All-purpose flour',40,'g',FL],['milk','Whole milk',720,'ml',LQ],['pep','Black pepper',2,'g',.43],['salt','Fine salt (to taste)',1.5,'g',SA]],
  st:['Brown the sausage in a skillet over medium heat, crumbling it. Do not drain the fat.','Sprinkle the flour over it and stir 1 minute.','Pour in the milk slowly, stirring.','Simmer 5 to 8 minutes until thick. Add more milk if too thick.','Season with plenty of pepper, and salt to taste.'],an:'Altitude does not change gravy.'}
 ];
@@ -255,7 +426,52 @@ var BREADS=[
  flours:[{name:'Whole wheat flour',g:430,wg:1,v:FL}],
  water:458,starter:null,salt:8,other:[{name:'Instant yeast',g:1,v:.32},{name:'Vital wheat gluten (helps structure since there\u2019s no kneading)',g:12,v:FL}],
  bulkHrs:[14,20],proofHrs:[1.5,2],bakeNote:'Bake covered 30 minutes at 450°F, then uncovered 15 to 20 minutes until deeply browned.',
- method:['Stir everything together into a wet, shaggy dough — no kneading.','Cover and let sit at room temperature {BULK} (this long, cool rest is what builds structure, not kneading).','Turn out onto a floured surface, fold over itself a couple of times, and shape loosely into a ball.','Rest, covered, {PROOF} on a floured towel.','Bake in a preheated, covered Dutch oven as above.']}
+ method:['Stir everything together into a wet, shaggy dough — no kneading.','Cover and let sit at room temperature {BULK} (this long, cool rest is what builds structure, not kneading).','Turn out onto a floured surface, fold over itself a couple of times, and shape loosely into a ball.','Rest, covered, {PROOF} on a floured towel.','Bake in a preheated, covered Dutch oven as above.']},
+{id:'bagels-reinhart',name:'New York Bagels',source:'Peter Reinhart ("Artisan Breads Every Day")',url:'https://www.injennieskitchen.com/2014/11/homemade-bagels/',adapted:false,
+ baseLoaves:8,unit:'bagel',pan:'boiling pot, then a semolina- or cornmeal-dusted baking sheet',
+ flours:[{name:'Bread flour or all-purpose flour (check label \u2014 verify unenriched)',g:420,wg:0,v:FL}],
+ water:255,starter:null,salt:11,
+ other:[{name:'Instant yeast',g:3,v:.32},{name:'Barley malt syrup (or brown rice syrup)',g:21,v:LQ}],
+ coldRetard:true,bulkHrs:[12,18],proofHrs:[0,0],
+ bakeNote:'Bring a large pot of water to a boil with 1 tbsp baking soda and 1.5 tbsp barley malt syrup per quart. Boil the bagels 1 to 2 minutes total, flipping once, then bake at 500°F for 8 to 10 minutes per side until deep golden.',
+ method:['Mix the flour, salt, yeast, malt syrup, and water into a stiff dough. Knead 6 to 8 minutes \u2014 this dough is much stiffer than bread dough, closer to a tight ball.','Divide into about {PIECE}g pieces and shape into bagels by poking a hole through a ball and stretching it to roughly 2.5 inches across.','Do the float test: drop one bagel in a bowl of cold water. If it floats within 10 seconds, the batch is ready; if not, rest 20 minutes and test again.','Place on a parchment-lined, lightly oiled sheet pan, cover, and retard {BULK} \u2014 this overnight cold rest is what builds real bagel flavor, not a long knead.','Boil and bake straight from the fridge, as above.'],
+ nt:'Published recipe \u2014 Peter Reinhart\u2019s bagel formula, with full gram amounts as reproduced from his book "Artisan Breads Every Day."'},
+{id:'challah-atk',name:'Challah',source:'America\u2019s Test Kitchen',url:'https://www.americastestkitchen.com/recipes/3368-challah',adapted:false,
+ baseLoaves:1,unit:'loaf',pan:'braided loaf on a sheet pan',
+ flours:[{name:'Unbleached all-purpose flour (check label \u2014 verify unenriched)',g:440,wg:0,v:FL}],
+ water:133,starter:null,salt:7.5,
+ other:[{name:'Sugar',g:50,v:SG},{name:'Instant yeast',g:7,v:.32},{name:'Large eggs, plus 1 yolk',g:117,unit:'egg'},{name:'Unsalted butter, melted',g:57,v:BU}],
+ bulkHrs:[1,1.5],proofHrs:[1,1.5],
+ bakeNote:'Brush with an egg-white wash and bake at 375°F for 25 to 30 minutes, until deep golden and it sounds hollow when tapped.',
+ method:['Whisk most of the flour with the sugar, yeast, and salt.','Beat in the eggs, melted butter, and water to a shaggy dough, then work in the rest of the flour.','Knead 8 to 10 minutes until smooth and elastic.','Bulk rise, covered, {BULK}, until doubled.','Divide into strands and braid. Place on a parchment-lined sheet.','Proof {PROOF} until puffy, then brush with the egg wash.','Bake as above.'],
+ nt:'Published recipe \u2014 America\u2019s Test Kitchen\u2019s Challah.'},
+{id:'focaccia-nosrat',name:'Ligurian Focaccia',source:'Samin Nosrat ("Good Things")',url:'https://www.barnesandnoble.com/blog/good-things-samin-nosrat-recipe/',adapted:false,
+ baseLoaves:1,unit:'half-sheet pan (18"×13")',pan:'oiled half-sheet pan',
+ flours:[{name:'Bread flour',g:800,wg:0,v:FL}],
+ water:720,starter:null,salt:20,
+ other:[{name:'Active dry yeast',g:7,v:.32},{name:'Honey',g:15,v:LQ},{name:'Extra-virgin olive oil',g:46,v:LQ}],
+ coldRetard:true,bulkHrs:[12,24],proofHrs:[.75,.75],
+ bakeNote:'Bake at 450°F about 25 minutes, then move to the top rack 5 to 7 minutes more to deepen the crust. Brush generously with olive oil as it comes out.',
+ method:['Stir together most of the water, the yeast, and honey. Mix in the flour by hand until shaggy.','Add the remaining water, salt, and olive oil. Mix until no dry flour remains \u2014 the dough will look wet and loose; that\u2019s correct, not a mistake.','Oil the top, cover, and refrigerate {BULK} \u2014 this slow, cold rise is what builds the structure and open crumb.','Oil the sheet pan generously. Turn the dough out and gently stretch it to fill the pan without deflating it too much.','Proof {PROOF} at room temperature until puffy.','Dimple all over with oiled fingers. Mix a brine of a few tablespoons water and a pinch of salt and pour over, letting it pool in the dimples.','Bake as above.'],
+ nt:'Published recipe \u2014 Samin Nosrat\u2019s "Sky-High Focaccia" from her book "Good Things," the updated bread-flour version of her original Salt Fat Acid Heat focaccia.'},
+{id:'brioche-ka',name:'Brioche',source:'King Arthur Baking',url:'https://www.kingarthurbaking.com/recipes/brioche-recipe',adapted:false,
+ baseLoaves:1,unit:'loaf (or 12 buns)',pan:'8.5"×4.5" loaf pan, two pans, or a 12-cup bun pan',
+ flours:[{name:'Unbleached all-purpose flour (check label \u2014 verify unenriched)',g:326,wg:0,v:FL}],
+ water:57,starter:null,salt:7.5,
+ other:[{name:'Baker\u2019s Special Dry Milk or nonfat dry milk',g:30,v:.4},{name:'Sugar',g:35,v:SG},{name:'Instant yeast',g:9,v:.32},{name:'Large eggs, cold',g:150,unit:'egg'},{name:'Unsalted butter, room temperature',g:142,v:BU}],
+ bulkHrs:[1,1],proofHrs:[1,3],
+ bakeNote:'Bake a large round loaf at 400°F; check at 15 minutes and tent with foil if it\u2019s browning too fast. It\u2019s done at 190°F in the center and sounds hollow when tapped.',
+ method:['Mix all ingredients in a stand mixer to a smooth, shiny dough \u2014 this is a wet, sticky dough not meant to be kneaded by hand, and takes 15 to 20 minutes in a mixer to come together.','First rise, covered, {BULK}.','Refrigerate overnight \u2014 this firms the butter and makes the soft dough possible to shape; it isn\u2019t optional.','The next day, divide and shape: one large round, two loaves, or 12 buns.','Proof {PROOF}, until puffy \u2014 warmer kitchens finish faster, colder ones take the longer end.','Bake as above.'],
+ nt:'Published recipe \u2014 King Arthur Baking\u2019s Brioche.'},
+{id:'buns-ka',name:'Hamburger & Hot Dog Buns',source:'King Arthur Baking ("Hamburger Potato Buns")',url:'https://shop.kingarthurbaking.com/content/recipes/212004_hamburgerpotatobuns.pdf',adapted:false,
+ baseLoaves:6,unit:'bun',pan:'hamburger bun pan, or a baking sheet',
+ flours:[{name:'Unbleached all-purpose flour (check label \u2014 verify unenriched)',g:360,wg:0,v:FL}],
+ water:227,starter:null,salt:8,
+ other:[{name:'Potato flour',g:43,v:FL},{name:'Baker\u2019s Special Dry Milk or nonfat dry milk',g:28,v:.4},{name:'Sugar',g:25,v:SG},{name:'Instant yeast',g:6,v:.32},{name:'Unsalted butter',g:57,v:BU}],
+ bulkHrs:[1,1],proofHrs:[1,1.5],
+ bakeNote:'Bake at 350°F for 15 to 20 minutes, until light golden. Brush with melted butter as they come out of the oven.',
+ method:['Mix and knead all the ingredients to a smooth, soft dough.','Bulk rise, covered, {BULK}, until almost doubled.','Deflate and divide into pieces. For hamburger buns, roll into balls and flatten gently into 3.5" rounds. For hot dog buns, roll each piece into a 4.5" to 5" cylinder instead.','Place on the prepared pan or in a hamburger bun pan, leaving room to spread.','Proof {PROOF}, until doubled.','Bake as above.'],
+ nt:'Published recipe \u2014 King Arthur Baking\u2019s "Hamburger Potato Buns." The recipe itself is written for round burger buns; shaping the same dough into cylinders for hot dog buns is a common, well-established adaptation of this style of soft potato dough, not a separate tested recipe \u2014 flagging that distinction.'}
 ];
 
 // ---- chef pizzas ----
@@ -300,7 +516,7 @@ function fermRange(hrs,temp){
   var lo=hrs[0]*f,hi=hrs[1]*f;
   var r=function(x){return x<2?Math.round(x*4)/4:Math.round(x*2)/2};
   lo=r(lo);hi=r(hi);
-  if(hi<=lo) return lo+' hours';
+  if(hi<=lo) return lo+(lo===1?' hour':' hours');
   return lo+' to '+hi+' hours';
 }
 function altBreadNote(ft){
@@ -326,7 +542,7 @@ function computeBread(r,mult){
   var totalWater=waterDirect+starterWater;
   var wgFlour=flours.reduce(function(s,f){return s+f.g*f.wg},0)+starterFlour*starterWG;
   var saltG=r.salt*mult;
-  var other=(r.other||[]).map(function(o){return {name:o.name,g:o.g*mult,v:o.v}});
+  var other=(r.other||[]).map(function(o){return {name:o.name,g:o.g*mult,v:o.v,unit:o.unit}});
   var totalDough=flours.reduce(function(s,f){return s+f.g},0)+waterDirect+starterG+saltG+other.reduce(function(s,o){return s+o.g},0);
   return {flours:flours,waterDirect:waterDirect,starterG:starterG,saltG:saltG,other:other,totalFlour:totalFlour,totalWater:totalWater,
     hydrationPct:totalWater/totalFlour*100,wgPct:wgFlour/totalFlour*100,totalDough:totalDough};
@@ -354,15 +570,24 @@ function renderBread(){
   try{localStorage.setItem('bk_r','bread:'+r.id);localStorage.setItem('bk_ft',$('elev').value);localStorage.setItem('bk_bmode',curBMode);
     localStorage.setItem('bk_bcount',$('bcount').value||'');localStorage.setItem('bk_bweight',$('bweight').value||'');localStorage.setItem('bk_ktemp',String(temp));}catch(e){}
 
-  var rows=c.flours.map(function(f){return '<tr><td>'+f.name+'</td><td class="g">'+gm(f.g,'g')+'</td><td class="v">'+vol(f.g*f.v).txt+'</td></tr>'}).join('');
+  CURRENT_ING=[];CURRENT_LABEL=r.name;CURRENT_QTY=n+' '+(n===1?r.unit:(r.unit==='loaf'?'loaves':r.unit+'s'));
+  var rows=c.flours.map(function(f){CURRENT_ING.push({name:f.name,amount:f.g,unit:'g'});return '<tr><td>'+f.name+'</td><td class="g">'+gm(f.g,'g')+'</td><td class="v">'+vol(f.g*f.v).txt+'</td></tr>'}).join('');
+  CURRENT_ING.push({name:'Water',amount:c.waterDirect,unit:'ml'});
   rows+='<tr><td>Water</td><td class="g">'+gm(c.waterDirect,'ml')+'</td><td class="v">'+vol(c.waterDirect*LQ).txt+'</td></tr>';
-  if(r.starter) rows+='<tr><td>'+r.starter.name+'</td><td class="g">'+gm(c.starterG,'g')+'</td><td class="v">—</td></tr>';
+  if(r.starter){CURRENT_ING.push({name:r.starter.name,amount:c.starterG,unit:'g'});rows+='<tr><td>'+r.starter.name+'</td><td class="g">'+gm(c.starterG,'g')+'</td><td class="v">—</td></tr>'}
+  CURRENT_ING.push({name:'Fine sea salt',amount:c.saltG,unit:'g'});
   rows+='<tr><td>Fine sea salt</td><td class="g">'+gm(c.saltG,'g')+'</td><td class="v">'+vol(c.saltG*SA).txt+'</td></tr>';
-  c.other.forEach(function(o){rows+='<tr><td>'+o.name+'</td><td class="g">'+gm(o.g,'g')+'</td><td class="v">'+vol(o.g*o.v).txt+'</td></tr>'});
+  c.other.forEach(function(o){
+    var vt;
+    if(o.unit==='egg'){var e=o.g/50,rr=Math.round(e*2)/2;vt=rr>=.5?fr(rr)+(rr>1?' eggs':' egg'):'beat & weigh'}
+    else vt=vol(o.g*o.v).txt;
+    CURRENT_ING.push({name:o.name,amount:o.g,unit:'g'});
+    rows+='<tr><td>'+o.name+'</td><td class="g">'+gm(o.g,'g')+'</td><td class="v">'+vt+'</td></tr>';
+  });
 
-  var bulk=fermRange(r.bulkHrs,temp);
+  var bulk=r.coldRetard?r.bulkHrs[0]+' to '+r.bulkHrs[1]+' hours, refrigerated':fermRange(r.bulkHrs,temp);
   var proof=r.proofHrs[1]>0?fermRange(r.proofHrs,temp):'';
-  var steps=r.method.map(function(s){return '<li>'+s.replace('{BULK}',bulk).replace('{PROOF}',proof)+'</li>'}).join('');
+  var steps=r.method.map(function(s){return '<li>'+s.replace('{BULK}',bulk).replace('{PROOF}',proof).replace('{PIECE}',Math.round(c.totalDough/n))+'</li>'}).join('');
   var srcLine='<a href="'+r.url+'" target="_blank" rel="noopener">'+r.source+'</a>'+(r.adapted?' — <b>adapted</b>, see note below':' — published recipe');
 
   var plural=r.unit==='loaf'?'loaves':(r.unit+'s');
@@ -371,8 +596,8 @@ function renderBread(){
    '<section class="card"><h2>Ingredients for '+n+' '+un+'</h2><table>'+rows+'</table>'+
    '<p class="note">Total dough: '+gm(c.totalDough,'g')+' · Hydration: '+Math.round(c.hydrationPct)+'% (starter\u2019s own flour and water included) · Whole grain: '+Math.round(c.wgPct)+'%</p>'+
    '<p class="note">'+srcLine+'</p></section>'+
-   '<section class="card"><h2>Fermentation, around '+temp+'°F</h2>'+
-   '<p class="note" style="margin:0">Bulk ferment roughly '+bulk+(proof?', then proof roughly '+proof+' more':'')+'. This is a rough guide — go by how the dough looks and feels, not the clock.</p>'+
+   '<section class="card"><h2>Fermentation'+(r.coldRetard?'':', around '+temp+'°F')+'</h2>'+
+   '<p class="note" style="margin:0">'+(r.coldRetard?'Main rise: '+bulk+' — this one happens in the fridge, so kitchen temperature doesn\u2019t speed it up the way it does the room-temperature breads here':'Bulk ferment roughly '+bulk)+(proof?', then proof roughly '+proof+' more at room temperature':'')+'. This is a rough guide — go by how the dough looks and feels, not the clock.</p>'+
    '<p class="note">'+altBreadNote(ft)+'</p></section>'+
    '<section class="card"><h2>Pan / setup</h2><p class="note" style="margin:0">'+r.pan+'</p></section>'+
    '<section class="card"><h2>Method</h2><ol>'+steps+'</ol><p class="note">'+r.bakeNote+'</p></section>';
@@ -400,12 +625,16 @@ function renderChefPizza(){
   var n=res.n,mult=n/r.baseCount;
   try{localStorage.setItem('bk_r','cp:'+r.id);localStorage.setItem('bk_cpcount',$('cpcount').value)}catch(e){}
   var c=computeChefPizza(r,mult,n);
-  var rows=c.flours.map(function(f){return '<tr><td>'+f.name+'</td><td class="g">'+gm(f.g,'g')+'</td><td class="v">'+vol(f.g*f.v).txt+'</td></tr>'}).join('');
+  CURRENT_ING=[];CURRENT_LABEL=r.chef;CURRENT_QTY=n+' '+(n>1?'pizzas':'pizza');
+  var rows=c.flours.map(function(f){CURRENT_ING.push({name:f.name,amount:f.g,unit:'g'});return '<tr><td>'+f.name+'</td><td class="g">'+gm(f.g,'g')+'</td><td class="v">'+vol(f.g*f.v).txt+'</td></tr>'}).join('');
+  CURRENT_ING.push({name:'Water',amount:c.water,unit:'ml'});
   rows+='<tr><td>Water</td><td class="g">'+gm(c.water,'ml')+'</td><td class="v">'+vol(c.water*LQ).txt+'</td></tr>';
+  CURRENT_ING.push({name:r.yeast?r.yeast.name:'Instant yeast',amount:c.yeast,unit:'g'});
   rows+='<tr><td>'+(r.yeast?r.yeast.name:'Instant yeast')+'</td><td class="g">'+gm(c.yeast,'g')+'</td><td class="v">'+vol(c.yeast*(r.yeast?r.yeast.v:.32)).txt+'</td></tr>';
+  CURRENT_ING.push({name:'Fine sea salt',amount:c.salt,unit:'g'});
   rows+='<tr><td>Fine sea salt</td><td class="g">'+gm(c.salt,'g')+'</td><td class="v">'+vol(c.salt*SA).txt+'</td></tr>';
-  if(c.oil>0) rows+='<tr><td>Olive oil</td><td class="g">'+gm(c.oil,'ml')+'</td><td class="v">'+vol(c.oil*LQ).txt+'</td></tr>';
-  if(r.pct&&r.pct.malt) rows+='<tr><td>Diastatic malt powder</td><td class="g">'+gm(c.malt,'g')+'</td><td class="v">'+vol(c.malt*.4).txt+'</td></tr>';
+  if(c.oil>0){CURRENT_ING.push({name:'Olive oil',amount:c.oil,unit:'ml'});rows+='<tr><td>Olive oil</td><td class="g">'+gm(c.oil,'ml')+'</td><td class="v">'+vol(c.oil*LQ).txt+'</td></tr>'}
+  if(r.pct&&r.pct.malt){CURRENT_ING.push({name:'Diastatic malt powder',amount:c.malt,unit:'g'});rows+='<tr><td>Diastatic malt powder</td><td class="g">'+gm(c.malt,'g')+'</td><td class="v">'+vol(c.malt*.4).txt+'</td></tr>'}
   var perBall=c.totalDough/n;
   var steps=r.method.map(function(s){return '<li>'+s.replace('{N}',n).replace('{BALL}',Math.round(r.ballWeight||perBall))+'</li>'}).join('').replace(/\b1 balls\b/g,'1 ball');
   var srcLine='<a href="'+r.url+'" target="_blank" rel="noopener">'+r.source+'</a>'+(r.adapted?' — <b>adapted</b>, see note below':' — published recipe');
@@ -440,6 +669,7 @@ function alt(ft,r){
 
 var cur=R[0],lastCount=null,countTouched=false;
 
+var CURRENT_ING=[],CURRENT_LABEL='',CURRENT_QTY='';
 function ingRow(i,mult,a,r){
   if(i[0]==='#') return '<tr class="sec"><td colspan="3">'+i[1]+'</td></tr>';
   var amt=i[2]*mult,ch='',v=i[4],vt,approx=false;
@@ -448,6 +678,7 @@ function ingRow(i,mult,a,r){
   if(v==='egg'){var e=amt/50,rr=Math.round(e*2)/2;if(Math.abs(e-rr)>.15||rr<.5)approx=true;vt=rr>=.5?fr(rr)+(rr>1?' eggs':' egg'):'beat & weigh'}
   else if(v===0){var oz=amt/28.35;vt=oz>=16?fr(Math.round(oz/4)/4)+' lb':fr(Math.round(oz*2)/2)+' oz'}
   else{var vv=vol(amt*v);vt=vv.txt;approx=vv.approx}
+  CURRENT_ING.push({name:i[1],amount:amt,unit:i[3]});
   return '<tr><td>'+i[1]+ch+'</td><td class="g">'+gm(amt,i[3])+'</td><td class="v">'+(approx?'<span class="approx">●</span> ':'')+vt+'</td></tr>';
 }
 
@@ -462,6 +693,7 @@ function renderGeneric(){
   try{localStorage.setItem('bk_r',r.id);localStorage.setItem('bk_ft',$('elev').value);localStorage.setItem('bk_n',String(n))}catch(e){}
   var ft=parseInt(($('elev').value||'0').replace(/[^\d]/g,''),10)||0;
   var mult=n/r.b,a=alt(ft,r);
+  CURRENT_ING=[];CURRENT_LABEL=recipeLabel(r);CURRENT_QTY=n+' '+r.u[n>1?1:0];
   var rows=r.ing.map(function(i){return ingRow(i,mult,a,r)}).join('');
   var hi=ft>=3000&&r.ov,temp=r.t?r.t+(r.ov?a.o:0):null,time=r.tm?(hi?r.tm[1]:r.tm[0]):'';
   var un=r.u[n>1?1:0],tips='';
@@ -476,7 +708,8 @@ function renderGeneric(){
   else if(ft<3000) eh='<p class="note" style="margin:0">Under 3,000 ft the sea-level recipe works as written.</p>'+(r.an?'<p class="note">'+r.an+'</p>':'');
   else{
     eh='<ul><li>Baking powder'+(r.cut.indexOf('soda')>-1?' and soda':'')+' cut by '+Math.round(a.l*1000)/10+'%</li>';
-    eh+='<li>Buttermilk up by '+vol(a.q*3*mult).txt+'</li>';
+    var liRow=r.ing.filter(function(i){return i[0]===r.li})[0];
+    eh+='<li>'+(liRow?liRow[1]:'Liquid')+' up by '+vol(a.q*3*mult).txt+'</li>';
     if(r.ov) eh+='<li>Oven raised from '+r.t+' to '+temp+'°F</li><li>Start checking 2 minutes early</li>';
     eh+='</ul>'+(r.an?'<p class="note">'+r.an+'</p>':'');
     if(ft>7000) eh+='<p class="note warn">Above 7,000 ft these numbers are stretched past what the sources cover. Bake a small test batch and adjust.</p>';
@@ -492,7 +725,7 @@ function renderGeneric(){
   out.innerHTML=
    '<section class="card"><h2>Ingredients for '+n+' '+un+'</h2><table>'+rows+'</table>'+tips+'</section>'+
    '<section class="card"><h2>Elevation: '+ft.toLocaleString()+' ft</h2>'+eh+'</section>'+
-   '<section class="card"><h2>Method</h2><ol>'+steps+'</ol>'+(r.nt?'<p class="note">'+r.nt+'</p>':'')+'</section>';
+   '<section class="card"><h2>Method</h2><ol>'+steps+'</ol>'+(r.nt?'<p class="note">'+r.nt+'</p>':'')+(r.url?'<p class="note"><a href="'+r.url+'" target="_blank" rel="noopener">Source</a></p>':'')+'</section>';
 }
 
 var curPStyle='ny',curPSizeIdx=2;
@@ -512,10 +745,13 @@ function renderPizza(){
   var flour=totalDough/divisor;
   var water=flour*st.pct.water,salt=flour*st.pct.salt,oil=flour*st.pct.oil,yeast=flour*st.pct.yeast;
   var ft=parseInt(($('elev').value||'0').replace(/[^\d]/g,''),10)||0;
+  CURRENT_ING=[{name:'Bread or all-purpose flour',amount:flour,unit:'g'},{name:'Water, cool',amount:water,unit:'ml'},{name:'Salt',amount:salt,unit:'g'}];
+  CURRENT_LABEL=st.label+' pizza dough';CURRENT_QTY=n+' '+(n>1?(st.unit+'s'):st.unit);
   var rows='<tr><td>Bread or all-purpose flour</td><td class="g">'+gm(flour,'g')+'</td><td class="v">'+vol(flour*FL).txt+'</td></tr>'+
    '<tr><td>Water, cool</td><td class="g">'+gm(water,'ml')+'</td><td class="v">'+vol(water*LQ).txt+'</td></tr>'+
    '<tr><td>Salt</td><td class="g">'+gm(salt,'g')+'</td><td class="v">'+vol(salt*SA).txt+'</td></tr>';
-  if(oil>0) rows+='<tr><td>Olive oil</td><td class="g">'+gm(oil,'ml')+'</td><td class="v">'+vol(oil*LQ).txt+'</td></tr>';
+  if(oil>0){CURRENT_ING.push({name:'Olive oil',amount:oil,unit:'ml'});rows+='<tr><td>Olive oil</td><td class="g">'+gm(oil,'ml')+'</td><td class="v">'+vol(oil*LQ).txt+'</td></tr>'}
+  CURRENT_ING.push({name:'Instant yeast',amount:yeast,unit:'g'});
   rows+='<tr><td>Instant yeast</td><td class="g">'+gm(yeast,'g')+'</td><td class="v">'+vol(yeast*.32).txt+'</td></tr>';
   var eh='<p class="note" style="margin:0">No numeric cut to the yeast — reliable altitude guidance for yeast dough is about behavior, not a fixed percentage.</p>'+
    '<ul><li>Dough rises faster above about 3,000 ft. Let it rise until doubled by look, not by a fixed time — that could be 25 to 50% quicker above 5,000 ft.</li>'+
@@ -660,6 +896,217 @@ function pick(id){
   renderGeneric();
 }
 
+// ==== navigation shell (home / category / recipe) ====
+var CATS=[
+ {key:'biscuits',label:'Biscuits & Quick Breads',groups:['Biscuits','Quick breads'],icon:'biscuit'},
+ {key:'bread',label:'Bread',special:'bread',icon:'bread'},
+ {key:'glutenfree',label:'Gluten-Free',groups:['Gluten-Free'],icon:'gf'},
+ {key:'dough',label:'Pizza & Pie Dough',special:'dough',icon:'pizza'},
+ {key:'chefpizza',label:'Copy Cat Recipes',special:'chefpizza',icon:'chefhat'},
+ {key:'tortillas',label:'Tortillas, Noodles & Pasta',groups:['Tortillas and noodles'],icon:'noodles'},
+ {key:'cookies',label:'Cookies',groups:['Cookies'],icon:'cookie'},
+ {key:'pies',label:'Pies',groups:['Pies'],icon:'pie'},
+ {key:'sauces',label:'Sauces & Gravy',groups:['Sauces & Gravy'],icon:'pan'}
+];
+var ICONS={
+ biscuit:'<circle cx="12" cy="13" r="7"/><path d="M9 6.5c0-1.5 1.2-3 3-3s3 1.5 3 3"/><circle cx="9.5" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="14.5" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="12" cy="15.5" r=".7" fill="currentColor" stroke="none"/>',
+ bread:'<path d="M4 12c0-4 3-7 8-7s8 3 8 7v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z"/><path d="M9 7.5l1.3 5M13.3 7l1.3 5.5"/>',
+ gf:'<path d="M12 21V10"/><path d="M12 10c-3-1-4-4-4-5 0 1-3 1-3 4 0 2 2 4 4 4"/><path d="M12 14c3-1 4-4 4-5 0 1 3 1 3 4 0 2-2 4-4 4"/><line x1="4.5" y1="19.5" x2="19.5" y2="4.5"/>',
+ pizza:'<path d="M12 3C7 8 4 12.5 4 15.5a8 8 0 0 0 16 0C20 12.5 17 8 12 3z"/><circle cx="11" cy="13" r=".8" fill="currentColor" stroke="none"/><circle cx="14.5" cy="15" r=".8" fill="currentColor" stroke="none"/><circle cx="10" cy="17" r=".8" fill="currentColor" stroke="none"/>',
+ chefhat:'<path d="M7.5 10a4 4 0 0 1 .7-6.8A4 4 0 0 1 12 1a4 4 0 0 1 3.8 2.2A4 4 0 0 1 16.5 10"/><path d="M7.5 10h9v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-3z"/><path d="M8.5 14v6h7v-6"/>',
+ noodles:'<path d="M4 9.5c3 3 6-3 9 0s6-3 9 0"/><path d="M4 14.5c3 3 6-3 9 0s6-3 9 0"/><path d="M4 19.5c3 3 6-3 9 0s6-3 9 0"/>',
+ cookie:'<circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r=".9" fill="currentColor" stroke="none"/><circle cx="14.5" cy="9.5" r=".9" fill="currentColor" stroke="none"/><circle cx="15" cy="14.5" r=".9" fill="currentColor" stroke="none"/><circle cx="9.5" cy="15" r=".9" fill="currentColor" stroke="none"/><circle cx="12.5" cy="12" r=".9" fill="currentColor" stroke="none"/>',
+ pie:'<path d="M4 20L12 4l8 16z"/><path d="M8.3 12.5l2.7-3.8M13 8.7l2.7 3.8M7 16h10"/>',
+ pan:'<path d="M5 11h14v2a7 7 0 0 1-14 0v-2z"/><path d="M5 11V9.5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1V11"/><line x1="19.5" y1="10" x2="22.5" y2="10"/><line x1="9" y1="21" x2="15" y2="21"/>',
+ cart:'<circle cx="10" cy="20" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l2 12.2a2 2 0 0 0 2 1.7h8.7a2 2 0 0 0 2-1.6L21 8H6"/>'
+};
+function iconSvg(key,size){
+  size=size||20;
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[key]||'')+'</svg>';
+}
+function recipeLabel(x){return x.style+(x.name&&x.name!=='Classic'?' — '+x.name:'')}
+function itemsForCat(cat){
+  if(cat.groups){
+    return R.filter(function(r){return cat.groups.indexOf(r.group)>-1}).map(function(r){
+      return {id:r.id,label:recipeLabel(r),sub:r.v?'Cross-checked, published':'Standard ratio, not cross-checked'};
+    });
+  }
+  if(cat.special==='bread'){
+    return BREADS.map(function(b){return {id:'bread:'+b.id,label:b.name+(b.adapted?' (adapted)':''),sub:b.source.replace(/\s*\([^)]*\)\s*$/,'')};});
+  }
+  if(cat.special==='chefpizza'){
+    return CHEFPIZZA.map(function(c){return {id:'cp:'+c.id,label:c.chef+(c.adapted?' (adapted)':''),sub:c.size+' pizza dough'};});
+  }
+  if(cat.special==='dough'){
+    var items=[{id:'pizza',label:'Pizza Dough — New York, Neapolitan, or Detroit',sub:'Pick a style and size'}];
+    R.filter(function(r){return r.group==='Dough'}).forEach(function(r){items.push({id:r.id,label:r.style,sub:'Crust, scales by count'});});
+    return items;
+  }
+  return [];
+}
+var SEARCHALL=null;
+function allSearchItems(){
+  if(SEARCHALL) return SEARCHALL;
+  var out=[];
+  CATS.forEach(function(cat){itemsForCat(cat).forEach(function(it){out.push({id:it.id,label:it.label,sub:it.sub,catLabel:cat.label})})});
+  SEARCHALL=out;
+  return out;
+}
+function makeRow(opts){
+  var b=document.createElement('button');b.type='button';b.className='navrow';
+  var html='';
+  if(opts.icon) html+='<div class="nricon">'+iconSvg(opts.icon)+'</div>';
+  else if(opts.num) html+='<div class="nrnum mono">'+opts.num+'</div>';
+  html+='<div class="nrmain"><div class="nrtitle">'+opts.title+'</div>'+(opts.sub?'<div class="nrsub">'+opts.sub+'</div>':'')+'</div>';
+  if(opts.count!=null) html+='<div class="nrcount mono">'+opts.count+'</div>';
+  html+='<svg class="nrchev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>';
+  b.innerHTML=html;
+  b.addEventListener('click',opts.onClick);
+  return b;
+}
+var screenBeforeShopping='home';
+function showScreen(name){
+  $('screenHome').style.display=name==='home'?'block':'none';
+  $('screenCategory').style.display=name==='category'?'block':'none';
+  $('screenRecipe').style.display=name==='recipe'?'block':'none';
+  $('screenShopping').style.display=name==='shopping'?'block':'none';
+  window.scrollTo(0,0);
+}
+
+// ---- shopping list ----
+function loadShopList(){var list={};try{list=JSON.parse(localStorage.getItem('bk_shopping')||'{}')}catch(e){list={}}return list}
+function saveShopList(list){try{localStorage.setItem('bk_shopping',JSON.stringify(list))}catch(e){}}
+function shopCount(){var list=loadShopList();return Object.keys(list).length}
+function updateCartDots(){
+  var n=shopCount();
+  ['cartDotHome','cartDotCat','cartDotRecipe'].forEach(function(id){
+    var el=$(id);if(!el)return;
+    if(n>0){el.textContent=n>99?'99+':String(n);el.style.display='flex'}else{el.style.display='none'}
+  });
+}
+function addCurrentToShoppingList(){
+  if(!CURRENT_ING.length) return;
+  var list=loadShopList();
+  CURRENT_ING.forEach(function(ing){
+    var key=ing.name+'|'+ing.unit;
+    if(!list[key]) list[key]={name:ing.name,unit:ing.unit,amount:0,sources:[]};
+    list[key].amount+=ing.amount;
+    var tag=CURRENT_LABEL+(CURRENT_QTY?' ('+CURRENT_QTY+')':'');
+    if(list[key].sources.indexOf(tag)===-1) list[key].sources.push(tag);
+  });
+  saveShopList(list);
+  updateCartDots();
+  var flash=$('addToListFlash');
+  flash.textContent='Added '+CURRENT_LABEL+' to your shopping list.';
+  flash.style.display='block';
+  clearTimeout(window._flashTimer);
+  window._flashTimer=setTimeout(function(){flash.style.display='none'},2500);
+}
+function renderShopping(){
+  var list=loadShopList();
+  var keys=Object.keys(list).sort(function(a,b){return list[a].name.localeCompare(list[b].name)});
+  var box=$('shopList');box.innerHTML='';
+  $('shopEmpty').style.display=keys.length?'none':'block';
+  $('clearListBtn').style.display=keys.length?'block':'none';
+  keys.forEach(function(key){
+    var item=list[key];
+    var row=document.createElement('div');row.className='shoprow';
+    row.innerHTML='<div class="shopmain"><div class="shopname">'+item.name+'</div>'+
+      '<div class="shopamt">'+gm(item.amount,item.unit)+'</div>'+
+      '<div class="shopsrc">'+item.sources.join(' · ')+'</div></div>'+
+      '<button type="button" class="shopdel" aria-label="Remove">×</button>';
+    row.querySelector('.shopdel').addEventListener('click',function(){
+      var l=loadShopList();delete l[key];saveShopList(l);renderShopping();updateCartDots();
+    });
+    box.appendChild(row);
+  });
+}
+function openShopping(from){
+  screenBeforeShopping=from;
+  renderShopping();
+  showScreen('shopping');
+}
+['cartBtnHome','cartBtnCat','cartBtnRecipe'].forEach(function(id){
+  var from=id==='cartBtnHome'?'home':id==='cartBtnCat'?'category':'recipe';
+  $(id).addEventListener('click',function(){openShopping(from)});
+});
+$('shopBack').addEventListener('click',function(){
+  if(screenBeforeShopping==='category') showScreen('category');
+  else if(screenBeforeShopping==='recipe') showScreen('recipe');
+  else{renderHome();showScreen('home')}
+});
+$('clearListBtn').addEventListener('click',function(){
+  saveShopList({});renderShopping();updateCartDots();
+});
+$('addToListBtn').addEventListener('click',addCurrentToShoppingList);
+function saveRecent(item){
+  try{
+    var recents=JSON.parse(localStorage.getItem('bk_recents')||'[]');
+    recents=recents.filter(function(x){return x.id!==item.id});
+    recents.unshift({id:item.id,label:item.label});
+    localStorage.setItem('bk_recents',JSON.stringify(recents.slice(0,5)));
+  }catch(e){}
+}
+var recipeBackGoesTo='home';
+function openRecipe(item){
+  pick(item.id);
+  $('recipeTitle').textContent=item.label;
+  saveRecent(item);
+  showScreen('recipe');
+}
+var curCat=null;
+function openCategory(cat){
+  curCat=cat;
+  $('catTitle').textContent=cat.label.toUpperCase();
+  var list=$('catItemList');list.innerHTML='';
+  itemsForCat(cat).forEach(function(item){
+    list.appendChild(makeRow({title:item.label,sub:item.sub,onClick:function(){recipeBackGoesTo='category';openRecipe(item)}}));
+  });
+  showScreen('category');
+}
+function renderContinue(){
+  var row=$('continueRow');row.innerHTML='';
+  var recents=[];try{recents=JSON.parse(localStorage.getItem('bk_recents')||'[]')}catch(e){}
+  if(!recents.length) return;
+  var label=document.createElement('div');label.className='sectionlabel';label.textContent='CONTINUE';
+  row.appendChild(label);
+  var list=document.createElement('div');list.className='navlist';
+  recents.slice(0,3).forEach(function(r){
+    list.appendChild(makeRow({title:r.label,onClick:function(){recipeBackGoesTo='home';openRecipe(r)}}));
+  });
+  row.appendChild(list);
+}
+function renderHome(){
+  var all=allSearchItems();
+  $('totalCount').textContent=all.length+' RECIPES';
+  var list=$('catList');list.innerHTML='';
+  CATS.forEach(function(cat){
+    var n=itemsForCat(cat).length;
+    list.appendChild(makeRow({icon:cat.icon,title:cat.label,sub:n+' recipe'+(n!==1?'s':''),onClick:function(){openCategory(cat)}}));
+  });
+  renderContinue();
+}
+$('catBack').addEventListener('click',function(){renderHome();showScreen('home')});
+$('recipeBack').addEventListener('click',function(){
+  if(recipeBackGoesTo==='category'&&curCat){showScreen('category')}
+  else{renderHome();showScreen('home')}
+});
+$('searchInput').addEventListener('input',function(){
+  var q=this.value.trim().toLowerCase();
+  if(!q){
+    $('searchResults').style.display='none';
+    $('homeBrowse').style.display='block';
+    return;
+  }
+  $('homeBrowse').style.display='none';
+  var box=$('searchResults');box.style.display='block';box.innerHTML='';
+  var matches=allSearchItems().filter(function(it){return it.label.toLowerCase().indexOf(q)>-1});
+  if(!matches.length){box.innerHTML='<p class="note" style="padding:14px 2px">No matches for "'+this.value.replace(/</g,'')+'".</p>';return}
+  matches.forEach(function(it){
+    box.appendChild(makeRow({title:it.label,sub:it.catLabel,onClick:function(){recipeBackGoesTo='home';openRecipe(it)}}));
+  });
+});
+
 var groups={};R.forEach(function(x){(groups[x.group]=groups[x.group]||[]).push(x)});
 Object.keys(groups).forEach(function(g){
   var og=document.createElement('optgroup');og.label=g;
@@ -695,18 +1142,15 @@ $('rs').addEventListener('change',function(){pick(this.value)});
 $('count').addEventListener('input',function(){countTouched=true;lastCount=parseInt(this.value,10)||lastCount;renderGeneric()});
 $('elev').addEventListener('input',function(){dispatchRender()});
 
-var sr='bis-classic';
 try{
-  sr=localStorage.getItem('bk_r')||'bis-classic';
   $('elev').value=localStorage.getItem('bk_ft')||'0';
   var savedN=parseInt(localStorage.getItem('bk_n'),10);
   if(savedN){lastCount=savedN;countTouched=true}
 }catch(e){$('elev').value='0'}
-if(sr==='pizza'||sr.indexOf('bread:')===0||sr.indexOf('cp:')===0){pick(sr)}
-else{
-  var found=R.filter(function(x){return x.id===sr})[0];
-  pick(found?sr:'bis-classic');
-}
+
+renderHome();
+updateCartDots();
+showScreen('home');
 </script>
 </body>
 </html>
