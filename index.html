@@ -3,11 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Baking Scaler</title>
+<title>The Recipe Bench</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#12161A;--ink:#EDEFEF;--card:#1C2126;--muted:#8B959C;--line:#262D33;--accent:#E8A33D;--aink:#12161A;--blue:#4FA8A0;--err:#FF6B5E;
+/* Default theme: warm cream / charcoal / burnt-orange ("The Recipe Bench").
+   Dark mode is a real, user-chosen option below, not just a leftover — it
+   reuses the app's original dark "Field Journal" values, toggled via a
+   button (persisted in localStorage), not tied to the OS setting alone. */
+:root{--bg:#FAF3E8;--ink:#2B2420;--card:#FFFDF8;--muted:#8C7F6E;--line:#E8DCC8;--accent:#C9602E;--aink:#FFF8F0;--blue:#3E7E78;--err:#C23B2E;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="dark"]{--bg:#12161A;--ink:#EDEFEF;--card:#1C2126;--muted:#8B959C;--line:#262D33;--accent:#E8A33D;--aink:#12161A;--blue:#4FA8A0;--err:#FF6B5E}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
@@ -18,6 +23,8 @@ h1{font:800 30px/1.1 Archivo,system-ui,sans-serif;margin:8px 0 12px}
 .topbar{display:flex;align-items:center;gap:10px;padding:22px 0 14px;position:sticky;top:0;background:var(--bg);z-index:5}
 .topbar .wordmark{font:900 20px/1.1 Archivo;letter-spacing:.2px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #screenHome .topbar .wordmark{font-size:22px;letter-spacing:.3px}
+#screenHome .topbar>div:first-child{flex:1;min-width:0}
+.tagline{font:600 12.5px/1.3 Archivo;color:var(--muted);margin-top:1px}
 .backbtn{flex-shrink:0;width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 20px/1 Archivo;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .backbtn:active{background:var(--line)}
 .count-badge{font:600 11px/1 'IBM Plex Mono';color:var(--muted);letter-spacing:.4px;flex-shrink:0}
@@ -32,6 +39,22 @@ h1{font:800 30px/1.1 Archivo,system-ui,sans-serif;margin:8px 0 12px}
 .nrnum{font:700 13px/1 'IBM Plex Mono';color:var(--accent);width:22px;flex-shrink:0}
 .nricon{width:38px;height:38px;flex-shrink:0;border-radius:9px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--accent)}
 .iconbtn{flex-shrink:0;width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+#favBtn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+#favBtn[aria-pressed="true"] #favIcon{fill:var(--accent)}
+.bottomnav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);z-index:20;padding-bottom:env(safe-area-inset-bottom,0)}
+.bottomnav button{flex:1;background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 8px;font:700 10px/1 Archivo;letter-spacing:.03em;text-transform:uppercase;cursor:pointer}
+.bottomnav button[aria-current="true"]{color:var(--accent)}
+.bottomnav .navbadge{position:absolute;top:2px;right:calc(50% - 20px);background:var(--accent);color:var(--bg);font:800 10px/1 'IBM Plex Mono';min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+main{padding-bottom:70px}
+/* Phone layout is the default everywhere above; this only loosens the
+   560px cap on tablet/desktop widths so the app doesn't look stretched
+   thin on a bigger screen. Navigation and recipe content stay single-
+   column — turning the list into a multi-column grid is a bigger visual
+   pass, not a quick widening. */
+@media (min-width:820px){
+  main{max-width:720px}
+  .bottomnav{max-width:720px;left:50%;transform:translateX(-50%);border-left:1px solid var(--line);border-right:1px solid var(--line);border-radius:14px 14px 0 0}
+}
 .iconbtn:active{background:var(--line)}
 .iconbtn .badge-dot{position:absolute;top:-4px;right:-4px;background:var(--accent);color:var(--aink);font:700 10px/1 'IBM Plex Mono';border-radius:99px;min-width:16px;height:16px;padding:0 3px;display:flex;align-items:center;justify-content:center}
 .addlistbtn{width:100%;background:var(--accent);color:var(--aink);border:0;border-radius:11px;padding:13px;font:800 15px Archivo;cursor:pointer;margin-bottom:4px}
@@ -44,23 +67,33 @@ h1{font:800 30px/1.1 Archivo,system-ui,sans-serif;margin:8px 0 12px}
 .shopsrc{font:500 12px/1.4 Archivo;color:var(--muted);margin-top:3px}
 .shopdel{flex-shrink:0;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--err);cursor:pointer;display:flex;align-items:center;justify-content:center;font:700 16px/1 Archivo}
 .clearlistbtn{width:100%;background:transparent;color:var(--err);border:1px solid var(--line);border-radius:11px;padding:12px;font:700 14px Archivo;cursor:pointer;margin-top:18px}
+.shopsectionhdr{font:800 11px/1 'IBM Plex Mono';letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:18px 2px 4px}
+.shopsectionhdr:first-child{margin-top:4px}
+.shoprecipe{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 2px;font:600 13px/1.3 Archivo;border-bottom:1px solid var(--line)}
+.shoprecipe:last-child{border-bottom:0}
+.shoprecipe .shopdel{width:26px;height:26px;font-size:14px}
+#shopRecipes{margin-bottom:6px;padding-bottom:6px;border-bottom:2px solid var(--line)}
 .cuisinetabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .cuisinetabs::-webkit-scrollbar{display:none}
 .cuisinetab{flex-shrink:0;font:700 13px Archivo;padding:9px 16px;border-radius:99px;border:1.5px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap}
 .cuisinetab[aria-current="true"]{background:var(--accent);color:var(--aink);border-color:var(--accent)}
 .swipehint{text-align:center;font:500 12px Archivo;color:var(--muted);padding:4px 2px 14px}
 .nrmain{flex:1;min-width:0}
-.nrtitle{font:700 16px/1.25 Archivo;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nrtitle{font:700 16px/1.25 Archivo;margin-bottom:2px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .nrsub{font:500 13px/1.3 Archivo;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nrcount{font:600 12px/1 'IBM Plex Mono';color:var(--muted);flex-shrink:0}
 .nrchev{flex-shrink:0;color:var(--muted)}
 select{width:100%;font:800 18px/1.2 Archivo,system-ui,sans-serif;padding:12px;border-radius:12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);margin-bottom:8px}
 .badge{display:inline-block;font-size:13px;border:1px solid var(--blue);color:var(--blue);border-radius:99px;padding:2px 10px;margin-top:2px}
-.hero{background:var(--accent);color:var(--aink);border-radius:18px;padding:16px;margin:16px 0 12px}
+.hero{background:var(--card);border:1.5px solid var(--accent);color:var(--ink);border-radius:14px;padding:12px 16px;margin:16px 0 12px;display:flex;align-items:center;flex-wrap:wrap;gap:4px 14px}
 .hero label,.card label{font-weight:500;display:block}
-#count{width:100%;font:800 64px/1.1 Archivo,system-ui,sans-serif;background:transparent;border:0;border-bottom:3px solid var(--aink);color:var(--aink);padding:4px 0;outline:none;border-radius:0}
-#count::placeholder{color:rgba(20,33,43,.35)}
-.rangehint{font-size:13px;color:rgba(20,33,43,.65);margin-top:4px}
+.hero label{color:var(--accent);text-transform:uppercase;font:800 11px/1 'IBM Plex Mono';letter-spacing:.05em;flex-basis:100%}
+#count{width:auto;flex:1;min-width:70px;font:800 34px/1.1 Archivo,system-ui,sans-serif;background:transparent;border:0;border-bottom:2px solid var(--accent);color:var(--ink);padding:2px 0;outline:none;border-radius:0}
+#count::placeholder{color:var(--muted)}
+.rangehint{font-size:13px;color:var(--muted);margin-top:0;flex-basis:100%}
+.hero .chips{margin-top:2px;flex-basis:100%}
+.hero .chips button{color:var(--ink)}
+.hero .chips button[aria-pressed="true"]{background:var(--accent);color:var(--aink);border-color:var(--accent)}
 .err{color:var(--err);font-weight:500;font-size:14px;margin-top:6px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .chips button{font:inherit;font-size:15px;padding:8px 14px;border-radius:99px;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer}
@@ -94,12 +127,13 @@ summary{cursor:pointer;font-weight:500}
 
 <div id="screenHome" class="screen">
 <div class="topbar">
-<div class="wordmark">BAKING SCALER</div>
+<div><div class="wordmark">THE RECIPE BENCH</div><div class="tagline">Find it. Make it. Make it yours.</div></div>
 <div class="count-badge mono" id="totalCount"></div>
+<button class="iconbtn" id="themeToggle" aria-label="Toggle dark mode" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" id="themeIcon"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.3M12 19.2v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.4 19.6l1.6-1.6M18 6l1.6-1.6"/></svg></button>
 <button class="iconbtn" id="cartBtnHome" aria-label="Shopping list" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="20" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l2 12.2a2 2 0 0 0 2 1.7h8.7a2 2 0 0 0 2-1.6L21 8H6"/></svg><span class="badge-dot" id="cartDotHome" style="display:none"></span></button>
 </div>
 <div class="searchbar">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B959C" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
 <label for="searchInput" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search recipes</label>
 <input id="searchInput" type="text" placeholder="Search biscuits, sourdough, pizza…" autocomplete="off">
 </div>
@@ -108,6 +142,10 @@ summary{cursor:pointer;font-weight:500}
 <div id="continueRow"></div>
 <div class="sectionlabel">BROWSE</div>
 <div id="catList" class="navlist"></div>
+<div id="filterSection" style="display:none">
+<div class="sectionlabel">FILTERS</div>
+<div id="filterList" class="navlist"></div>
+</div>
 </div>
 </div>
 
@@ -125,6 +163,7 @@ summary{cursor:pointer;font-weight:500}
 <div class="topbar">
 <button class="backbtn" id="recipeBack" aria-label="Back" type="button">‹</button>
 <div class="wordmark" id="recipeTitle"></div>
+<button class="iconbtn" id="favBtn" aria-label="Save recipe" type="button"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" id="favIcon"><path d="M12 17.3l-5.4 3.2 1.4-6.1-4.7-4.1 6.2-.5L12 4l2.5 5.8 6.2.5-4.7 4.1 1.4 6.1z"/></svg></button>
 <button class="iconbtn" id="cartBtnRecipe" aria-label="Shopping list" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="20" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l2 12.2a2 2 0 0 0 2 1.7h8.7a2 2 0 0 0 2-1.6L21 8H6"/></svg><span class="badge-dot" id="cartDotRecipe" style="display:none"></span></button>
 </div>
 
@@ -216,13 +255,35 @@ summary{cursor:pointer;font-weight:500}
 <div class="wordmark">SHOPPING LIST</div>
 </div>
 <div id="shopEmpty" class="note" style="display:none;padding:20px 2px">Nothing here yet. Open a recipe, scale it to what you need, then tap "Add to Shopping List."</div>
+<div id="shopRecipes" style="display:none"></div>
 <div id="shopList"></div>
 <button type="button" class="clearlistbtn" id="clearListBtn" style="display:none">Clear shopping list</button>
 </div>
+
+<div id="screenSaved" class="screen" style="display:none">
+<div class="topbar">
+<div class="wordmark">SAVED</div>
+</div>
+<div id="savedEmpty" class="note" style="display:none;padding:20px 2px">Nothing saved yet. Open a recipe and tap the star to keep it here.</div>
+<div id="savedList" class="navlist"></div>
+</div>
 </main>
+<nav class="bottomnav" aria-label="Main">
+<button type="button" id="navHome"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>Home</button>
+<button type="button" id="navSaved"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.3l-5.4 3.2 1.4-6.1-4.7-4.1 6.2-.5L12 4l2.5 5.8 6.2.5-4.7 4.1 1.4 6.1z"/></svg>Saved</button>
+<button type="button" id="navShopping" style="position:relative"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="20" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l2 12.2a2 2 0 0 0 2 1.7h8.7a2 2 0 0 0 2-1.6L21 8H6"/></svg>Shopping<span class="navbadge" id="navShopBadge" style="display:none"></span></button>
+</nav>
 
 <script>
 var $=function(i){return document.getElementById(i)};
+// Dark mode is a real, user-chosen toggle — not just following the OS
+// setting — but a first-time visitor's system preference picks the
+// starting point so it doesn't default to the "wrong" theme for them.
+(function(){
+  var saved=null;try{saved=localStorage.getItem('bk_theme')}catch(e){}
+  var dark=saved?saved==='dark':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if(dark) document.documentElement.setAttribute('data-theme','dark');
+})();
 var clamp=function(v,lo,hi){return Math.min(hi,Math.max(lo,v))};
 var FL=.4,SG=.2381,SA=.1667,BP=.25,SO=.1818,BU=.2113,LQ=.2029;
 
@@ -324,7 +385,7 @@ var R=[
  nt:'Published recipe \u2014 King Arthur Baking\u2019s Classic Lemon Meringue Pie. Needs a fully baked (blind-baked) crust first, unlike the other pies here.'},
 {id:'sauce-nocook-atk',group:'Sauces & Gravy',style:'No-Cook Pizza Sauce',name:'America\u2019s Test Kitchen',u:['pizza\u2019s worth','pizzas\u2019 worth'],b:2,c:[1,2,4],d:2,min:1,max:12,k:'n',v:1,
  ing:[['tom','Whole peeled tomatoes, drained (juice reserved)',784,'g',LQ],['oil','Olive oil',14,'g',LQ],['vin','Red wine vinegar (lemon juice or white vinegar work as a swap)',5,'g',LQ],['garlic','Garlic cloves, minced',6,'g',.33],['oreg','Dried oregano',1,'g',1],['salt','Salt, to taste',3,'g',SA]],
- st:['Put the drained tomatoes, oil, vinegar, garlic, and oregano in a food processor; pulse until smooth, about 30 seconds.','Thin with the reserved tomato juice until the sauce measures about 2 cups per batch.','Season with salt to taste.','Use uncooked — the tomatoes are already cooked in the can, and the oven finishes the job.'],
+ st:['Put the drained tomatoes, oil, vinegar, garlic, and oregano in a food processor; pulse until smooth, about 30 seconds.','Thin with the reserved tomato juice until the sauce reaches a pourable, spreadable consistency.','Season with salt to taste.','Use uncooked — the tomatoes are already cooked in the can, and the oven finishes the job.'],
  nt:'Published recipe (America\u2019s Test Kitchen, "No-Cook Pizza Sauce"). Keeps a week refrigerated, or freezes up to a month.',an:'No altitude adjustment — this isn\u2019t leavened.',url:'https://www.americastestkitchen.com/recipes/10421-no-cook-pizza-sauce'},
 {id:'sauce-nocook-reinhart',group:'Sauces & Gravy',style:'No-Cook Pizza Sauce',name:'Peter Reinhart-style',u:['pizza\u2019s worth','pizzas\u2019 worth'],b:5,c:[2,4,5,8],d:5,min:1,max:20,k:'n',v:1,
  ing:[['tom','Crushed or ground tomatoes',784,'g',LQ],['salt','Salt',6,'g',SA],['pep','Black pepper',0.7,'g',.5],['basil','Dried basil (optional)',1,'g',1],['oreg','Dried oregano (optional)',1,'g',1],['garlic','Granulated garlic (or 5 fresh cloves, minced)',9,'g',.33]],
@@ -449,77 +510,77 @@ var R=[
 {id:'gravy',group:'Sauces & Gravy',style:'Sausage Gravy',name:'Classic',u:['serving','servings'],b:6,c:[2,4,6,12],d:6,min:1,max:30,k:'n',
  ing:[['saus','Breakfast sausage (check the label if it matters to you \u2014 some brands add nitrates/nitrites or fillers, others don\u2019t)',454,'g',0],['flour','Unbleached all-purpose flour',40,'g',FL],['milk','Whole milk',720,'ml',LQ],['pep','Black pepper',2,'g',.43],['salt','Fine salt (to taste)',1.5,'g',SA]],
  st:['Brown the sausage in a skillet over medium heat, crumbling it. Do not drain the fat.','Sprinkle the flour over it and stir 1 minute.','Pour in the milk slowly, stirring.','Simmer 5 to 8 minutes until thick. Add more milk if too thick.','Season with plenty of pepper, and salt to taste.'],an:'Altitude does not change gravy.'},
-{id:'entree-mongolian-beef',group:'Entrees: Chinese & Japanese',style:'Beef',name:'Mongolian Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/mongolian-beef-recipe/',
+{id:'entree-mongolian-beef',group:'Entrees: Chinese',style:'Beef',name:'Mongolian Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/mongolian-beef-recipe/',
  ing:[['#','Marinade'],['beef','Flank steak, sliced against the grain 1/4" thick',454,'g',0],['oil1','Neutral oil',10,'g',LQ],['wine1','Shaoxing wine (or dry sherry, optional)',10,'g',LQ],['soy1','Light soy sauce',5,'g',LQ],['corn1','Cornstarch',8,'g',.33],['water1','Water',15,'g',LQ],['soda','Baking soda',1.2,'g',1],
   ['#','Sauce'],['sugar','Light brown sugar',55,'g',SG],['hotwater','Hot water (or hot low-sodium chicken or beef stock)',180,'g',LQ],['soy2','Light soy sauce',60,'g',LQ],['dsoy','Dark soy sauce (optional)',5,'g',LQ],
   ['#','Coating & searing'],['corn2','Cornstarch (for dredging)',64,'g',.33],['oil2','Neutral oil (for shallow-frying)',150,'g',LQ],
   ['#','Aromatics & finish'],['ginger','Fresh ginger, minced',5,'g',1],['chili','Dried red chilies (optional)',2,'g',0],['garlic','Garlic, finely chopped (about 3 cloves)',9,'g',.33],['scallion','Scallions, cut into 2" pieces, white and green separated',40,'g',0],['corn3','Cornstarch (for slurry)',14,'g',.33],['water2','Water (for slurry)',30,'g',LQ]],
  st:['Combine the beef with the marinade ingredients. Marinate 1 hour.','Mix the sauce ingredients in a separate bowl; set aside.','Dredge the marinated beef slices in the dredging cornstarch.','Heat the frying oil in a wok over high heat until just smoking. Sear the beef in batches, 1 minute per side, until crispy. Remove and set aside.','Drain the oil, leaving 1 tbsp. Add the ginger and dried chilies over medium-high heat, then the garlic and white scallion parts; stir 15 seconds. Add the sauce and simmer 2 minutes.','Stir in the cornstarch slurry and cook until the sauce coats a spoon.','Add the beef and green scallion parts; toss 30 seconds. Serve with steamed rice.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Mongolian Beef.'},
-{id:'entree-beef-broccoli',group:'Entrees: Chinese & Japanese',style:'Beef',name:'Beef and Broccoli',u:['serving','servings'],b:6,c:[4,6,8,10],d:6,min:1,max:20,k:'n',v:1,url:'https://thewoksoflife.com/beef-with-broccoli-all-purpose-stir-fry-sauce/',
+{id:'entree-beef-broccoli',group:'Entrees: Chinese',style:'Beef',name:'Beef and Broccoli',u:['serving','servings'],b:6,c:[4,6,8,10],d:6,min:1,max:20,k:'n',v:1,url:'https://thewoksoflife.com/beef-with-broccoli-all-purpose-stir-fry-sauce/',
  ing:[['#','Beef & marinade'],['beef','Flank steak, sliced 1/4" thick',454,'g',0],['soda','Baking soda (optional)',1,'g',1],['water1','Water',45,'g',LQ],['corn1','Cornstarch',6,'g',.33],['oil1','Vegetable oil',10,'g',LQ],['oyster1','Oyster sauce',6,'g',LQ],
   ['#','Sauce'],['stock','Low-sodium chicken stock, warmed',160,'g',LQ],['sugar','Granulated sugar',6,'g',SG],['soy1','Soy sauce',23,'g',LQ],['dsoy','Dark soy sauce',5,'g',LQ],['oyster2','Oyster sauce',17,'g',LQ],['sesame','Sesame oil',2,'g',LQ],['pepper','White pepper, pinch',0.2,'g',1],
   ['#','Rest of the dish'],['broccoli','Broccoli florets',360,'g',0],['oil2','Vegetable oil, divided',42,'g',LQ],['garlic','Garlic, minced',6,'g',.33],['ginger','Fresh ginger, minced (optional)',1,'g',1],['wine','Shaoxing wine',15,'g',LQ],['corn2','Cornstarch (for slurry)',21,'g',.33],['water2','Water (for slurry)',45,'g',LQ]],
- st:['Combine the beef with the baking soda and water; massage until absorbed. Mix in the cornstarch, oil, and oyster sauce. Marinate at least 30 minutes.','Mix the sauce ingredients; set aside.','Blanch the broccoli 30 to 60 seconds in boiling water. Drain.','Heat the wok until smoking. Add 2 tbsp oil and sear the beef until browned, 2 to 3 minutes. Remove.','Add another tbsp oil, the garlic and ginger; stir 5 seconds. Add the Shaoxing wine around the pan, then the sauce. Bring to a simmer.','Stir in the cornstarch slurry; simmer 20 seconds until thickened.','Add the beef and broccoli; toss to coat. Serve with rice.'],
+ st:['Combine the beef with the baking soda and water; massage until absorbed. Mix in the cornstarch, oil, and oyster sauce. Marinate at least 30 minutes.','Mix the sauce ingredients; set aside.','Blanch the broccoli 30 to 60 seconds in boiling water. Drain.','Heat the wok until smoking. Add about {ing:oil2:0.667} of the oil and sear the beef until browned, 2 to 3 minutes. Remove.','Add the remaining oil, the garlic and ginger; stir 5 seconds. Add the Shaoxing wine around the pan, then the sauce. Bring to a simmer.','Stir in the cornstarch slurry; simmer 20 seconds until thickened.','Add the beef and broccoli; toss to coat. Serve with rice.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Beef and Broccoli.'},
-{id:'entree-sesame-beef',group:'Entrees: Chinese & Japanese',style:'Beef',name:'Sesame Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/sesame-beef/',
+{id:'entree-sesame-beef',group:'Entrees: Chinese',style:'Beef',name:'Sesame Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/sesame-beef/',
  ing:[['#','Marinade'],['beef','Flank steak, sliced against the grain 1/4" thick',340,'g',0],['water1','Water',15,'g',LQ],['corn1','Cornstarch',6,'g',.33],['wine','Shaoxing wine',10,'g',LQ],['sesame1','Sesame oil',5,'g',LQ],['oyster1','Oyster sauce',5,'g',LQ],['soda','Baking soda',1.2,'g',1],
   ['#','Sauce'],['hotwater','Hot water',160,'g',LQ],['sugar','Brown sugar',40,'g',SG],['soy','Light soy sauce',38,'g',LQ],['oyster2','Oyster sauce',17,'g',LQ],['sesame2','Sesame oil',7,'g',LQ],['vinegar','Rice vinegar',2.5,'g',LQ],['pepper','White pepper, pinch',0.2,'g',1],
   ['#','Rest of the dish'],['corn2','Cornstarch (for dredging)',32,'g',.33],['seeds','Toasted sesame seeds (for dredging)',23,'g',0],['oil','Neutral oil (for frying)',109,'g',LQ],['garlic','Garlic, chopped',6,'g',.33],['scallion','Scallions, chopped',6,'g',0],['corn3','Cornstarch (for slurry)',6,'g',.33],['water2','Water (for slurry)',15,'g',LQ]],
  st:['Combine the beef with the marinade ingredients. Marinate 1 hour (or overnight).','Mix the sauce ingredients; set aside.','Stir together the dredging cornstarch and sesame seeds. Dredge the beef, shaking off excess.','Heat the frying oil over medium-high heat. Shallow-fry the beef 1 minute per side until crusty. Transfer to a plate in a single layer.','Drain the oil, leaving a sediment-free tablespoon. Add the garlic; cook 15 seconds.','Add the sauce and bring to a simmer. Add the scallions, then the cornstarch slurry; cook until the sauce coats a spoon.','Add the beef and toss to coat. Serve with rice.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Sesame Beef.'},
-{id:'entree-orange-beef',group:'Entrees: Chinese & Japanese',style:'Beef',name:'Orange Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/orange-beef/',
+{id:'entree-orange-beef',group:'Entrees: Chinese',style:'Beef',name:'Orange Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/orange-beef/',
  ing:[['#','Marinade'],['beef','Flank steak or top sirloin, sliced 2-3" pieces, 1/8-1/4" thick',340,'g',0],['water1','Water',15,'g',LQ],['corn1','Cornstarch',6,'g',.33],['oj1','Orange juice',10,'g',LQ],['oil1','Vegetable oil',10,'g',LQ],['oyster','Oyster sauce',5,'g',LQ],['soda','Baking soda',1.2,'g',1],['fivespice','Five spice powder, pinch (optional)',0.3,'g',1],
   ['#','Sauce'],['warmwater','Warm water',80,'g',LQ],['sugar','Sugar',12,'g',SG],['marmalade','Orange marmalade',20,'g',LQ],['oj2','Orange juice',80,'g',LQ],['soy','Light soy sauce',45,'g',LQ],['wine','Shaoxing wine',10,'g',LQ],['sesame','Sesame oil',1,'g',LQ],['pepper','White pepper, pinch',0.2,'g',1],
   ['#','Rest of the dish'],['corn2','Cornstarch (for dredging)',32,'g',.33],['oil2','Vegetable oil (for frying, plus 1/2 tbsp)',85,'g',LQ],['salt','Salt (for blanching water)',3,'g',SA],['broccoli','Broccoli florets',180,'g',0],['ginger','Ginger, 2 slices',4,'g',0],['chili','Dried red chilies (optional)',2,'g',0],['peel','Dried mandarin orange peel, 5 pieces (Chinese grocery; or see note)',5,'g',0],['anise','Star anise, 1 whole',1,'g',0],['garlic','Garlic, finely chopped',3,'g',.33],['scallion','Scallion, sliced',10,'g',0],['corn3','Cornstarch (for slurry)',6,'g',.33],['water2','Water (for slurry)',15,'g',LQ]],
  st:['Slice the beef and combine with the marinade ingredients. Marinate 1 hour.','Mix the sauce ingredients; set aside.','Dredge the beef in cornstarch. Heat the frying oil until just smoking; sear the beef in batches 45 seconds to 1 minute per side. Set aside.','Blanch the broccoli in salted boiling water 45 seconds; drain and arrange on a serving plate.','In the wok over medium-low heat, add the ginger, dried chilies, orange peel, and star anise; toast 30 to 60 seconds. Add the garlic and scallion; stir 30 seconds.','Add the sauce and bring to a simmer. Stir in the cornstarch slurry; cook until thickened.','Toss in the beef (and broccoli, if you prefer it mixed in). Serve immediately.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Orange Beef. Dried mandarin orange peel is a specialty item from a Chinese grocery store \u2014 the source notes you can also dry your own mandarin or tangerine peels at home as a substitute.'},
-{id:'entree-kungpao-beef',group:'Entrees: Chinese & Japanese',style:'Beef',name:'Kung Pao Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/kung-pao-beef/',
+{id:'entree-kungpao-beef',group:'Entrees: Chinese',style:'Beef',name:'Kung Pao Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/kung-pao-beef/',
  ing:[['#','Marinade'],['beef','Flank steak, cut into small 1/4" pieces',340,'g',0],['corn1','Cornstarch',6,'g',.33],['wine','Shaoxing wine',10,'g',LQ],['oil1','Neutral oil',10,'g',LQ],['oyster','Oyster sauce',10,'g',LQ],['soda','Baking soda',0.6,'g',1],
   ['#','Sauce'],['water','Warm water or stock',45,'g',LQ],['soy','Light soy sauce',15,'g',LQ],['vinegar','Rice vinegar',15,'g',LQ],['sugar','Sugar',4,'g',SG],['corn2','Cornstarch',3,'g',.33],['hoisin','Hoisin sauce',6,'g',LQ],['sichuan','Sichuan peppercorn powder',1,'g',1],['dsoy','Dark soy sauce',2.5,'g',LQ],['sesame','Sesame oil',2.5,'g',LQ],
   ['#','Roasted peanuts (or use pre-roasted and skip this step)'],['oil2','Neutral oil',14,'g',LQ],['peanuts','Raw shelled peanuts',150,'g',0],
   ['#','Rest of the dish'],['oil3','Neutral oil',28,'g',LQ],['ginger','Fresh ginger, minced',3,'g',1],['chili','Dried red chilies, deseeded and sliced',2,'g',0],['bell','Bell pepper, diced',75,'g',0],['scallion','Scallions, white and green separated',20,'g',0],['garlic','Garlic, chopped',6,'g',.33]],
  st:['Combine the beef with the marinade ingredients. Marinate 1 hour at room temperature.','Mix the sauce ingredients; set aside.','If roasting your own peanuts: heat the oil, add the peanuts, and stir constantly over medium heat 5 minutes until golden. Cool completely.','Heat more oil in the wok until just smoking. Sear the beef 1.5 minutes per side until crisp. Remove, leaving the oil behind.','Over low heat, toast the ginger and chilies. Add the bell pepper and white scallion parts; cook 1 to 2 minutes. Add the garlic; stir 20 seconds.','Return the beef to the wok over high heat; stir-fry 30 seconds. Add the sauce and stir to deglaze.','Once thickened, add the peanuts and green scallion parts. Serve with jasmine rice.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Kung Pao Beef.'},
-{id:'entree-hunan-beef',group:'Entrees: Chinese & Japanese',style:'Beef',name:'Hunan Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/hunan-beef/',
+{id:'entree-hunan-beef',group:'Entrees: Chinese',style:'Beef',name:'Hunan Beef',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/hunan-beef/',
  ing:[['#','Beef'],['beef','Flank steak, sliced 1/4" thick',454,'g',0],['soda','Baking soda',1.2,'g',1],['water1','Water',30,'g',LQ],['oyster','Oyster sauce',5,'g',LQ],['corn1','Cornstarch (for dredging)',43,'g',.33],
   ['#','Peppers & aromatics'],['redholland','Red Holland pepper, deseeded (or red Fresno)',25,'g',0],['green','Green bell pepper or poblano, deseeded',100,'g',0],['redbell','Red bell pepper, deseeded',100,'g',0],['banana','Banana peppers, deseeded',80,'g',0],['driedchili','Whole dried chili peppers',2,'g',0],['ginger','Fresh ginger, sliced',8,'g',1],['shallot','Shallots, thinly sliced',40,'g',0],['garlic','Garlic, sliced',15,'g',.33],['blackbean','Fermented black beans, rinsed (Chinese grocery)',20,'g',0],['scallion','Scallions, cut into 2" pieces',60,'g',0],
   ['#','Sauce'],['sugar','Granulated sugar',2,'g',SG],['hotwater','Hot water',30,'g',LQ],['vinegar','Chinese black vinegar',2.5,'g',LQ],['soy','Soy sauce',38,'g',LQ],['pepper','White pepper',0.5,'g',1],
   ['#','Rest of the dish'],['oil','Vegetable or canola oil (for frying)',73,'g',LQ],['wine','Shaoxing wine',30,'g',LQ]],
  st:['Combine the beef with the baking soda, water, and oyster sauce; massage until absorbed. Marinate 30 minutes, then dredge in cornstarch.','Slice the fresh peppers; leave the dried chilies whole unless you want it spicier.','Stir the sugar into the hot water, then add the vinegar, soy sauce, and white pepper. Set aside.','Heat the wok until smoking. Sear the beef in 3 batches in the oil until browned and crisp. Set aside, leaving about 2 tbsp oil in the wok.','Add the ginger; fry 30 seconds until caramelized. Add the shallots; fry 30 seconds. Add the fresh peppers; stir-fry 1 minute on high heat.','Push aside and toast the dried chilies 20 seconds. Add the Shaoxing wine around the pan, then the garlic, black beans, and red pepper. Stir-fry 30 to 60 seconds.','Add the fried beef and the sauce. Stir-fry on high heat until most of the sauce has evaporated \u2014 this dish is meant to be dry, not saucy. Add the scallions and serve.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Hunan Beef (the authentic Chinese version, not the Americanized takeout one). Fermented black beans are a Chinese-grocery staple \u2014 rinse before using.'},
-{id:'entree-general-tso',group:'Entrees: Chinese & Japanese',style:'Chicken',name:'General Tso\u2019s Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/takeout-places-general-tsos-chicken/',
+{id:'entree-general-tso',group:'Entrees: Chinese',style:'Chicken',name:'General Tso\u2019s Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/takeout-places-general-tsos-chicken/',
  ing:[['#','Chicken'],['chicken','Boneless, skinless chicken thighs, cut into 1" pieces',450,'g',0],['wine1','Shaoxing wine',5,'g',LQ],['water1','Water',15,'g',LQ],['salt1','Salt',1.5,'g',SA],['pepper1','White pepper',0.5,'g',1],['sesame1','Sesame oil',5,'g',LQ],['seeds','Toasted sesame seeds',3,'g',0],['flour','Unbleached all-purpose flour',8,'g',FL],['corn1','Cornstarch',32,'g',.33],
   ['#','General Tso sauce'],['stock','Low-sodium chicken stock',80,'g',LQ],['dsoy','Dark soy sauce',5,'g',LQ],['soy','Soy sauce',15,'g',LQ],['sugar','Brown sugar',53,'g',SG],['vinegar','Rice wine vinegar',2.5,'g',LQ],
   ['#','Rest of the dish'],['broccoli','Broccoli florets',225,'g',0],['oil','Peanut, canola, or vegetable oil, for frying (plus 1 tbsp)',950,'g',LQ],['chili','Dried red chili peppers, 5-6',2,'g',0],['garlic','Garlic, minced',6,'g',.33],['wine2','Shaoxing wine',10,'g',LQ],['corn2','Cornstarch (for slurry)',16,'g',.33],['water2','Water (for slurry)',30,'g',LQ]],
  st:['Marinate the chicken in the Shaoxing wine, water, salt, white pepper, and sesame oil until absorbed. Mix in the sesame seeds, flour, and cornstarch to coat.','Mix the sauce ingredients; set aside.','Blanch the broccoli 30 seconds to 1 minute in boiling water; drain.','Heat the frying oil to 335°F. Fry the chicken in small batches until light golden, about 5 minutes. Drain, then fry a second time 3 to 5 minutes until very crispy.','In a clean wok over medium heat, add 1 tbsp oil and the dried chilies; cook 5 seconds. Add the garlic and Shaoxing wine.','Add the sauce; bring to a simmer. Stir in the cornstarch slurry until glossy and thickened.','Add the chicken and broccoli; toss to coat. Serve immediately with rice.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s General Tso\u2019s Chicken, from the family\u2019s own restaurant-chef recipe.'},
-{id:'entree-orange-chicken',group:'Entrees: Chinese & Japanese',style:'Chicken',name:'Orange Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/orange-chicken/',
+{id:'entree-orange-chicken',group:'Entrees: Chinese',style:'Chicken',name:'Orange Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/orange-chicken/',
  ing:[['#','Chicken'],['chicken','Boneless, skinless chicken breast or thighs, cut into 1.5" chunks',450,'g',0],['water1','Water',15,'g',LQ],['wine','Shaoxing wine',10,'g',LQ],['salt1','Salt',3,'g',SA],['garlicpowder','Garlic powder',0.5,'g',1],['sesame','Sesame oil',1,'g',LQ],['pepper1','White pepper',0.2,'g',1],['corn1','Cornstarch (for dredging)',43,'g',.33],['oil1','Neutral oil, for shallow-frying',300,'g',LQ],
   ['#','Sauce'],['oj','Fresh or store-bought orange juice',120,'g',LQ],['stock','Chicken stock',120,'g',LQ],['sugar','Sugar',25,'g',SG],['vinegar','Rice wine vinegar',38,'g',LQ],['oyster','Oyster sauce',17,'g',LQ],['salt2','Salt',1.5,'g',SA],
   ['#','Rest of the dish'],['peel','Dried tangerine or mandarin orange peel, 3-4 pieces (optional)',4,'g',0],['chili','Dried red chili peppers, 6',2,'g',0],['anise','Star anise, 2 whole',2,'g',0],['garlic','Garlic, minced (optional)',2,'g',.33],['ginger','Fresh ginger, minced (optional)',2,'g',1],['corn2','Cornstarch (for slurry)',16,'g',.33],['water2','Water (for slurry)',30,'g',LQ],['scallion','Scallion, sliced',10,'g',0]],
  st:['Toss the chicken with the water, Shaoxing wine, salt, garlic powder, sesame oil, and white pepper. Marinate at least 20 minutes (or overnight, refrigerated).','Dredge the chicken in cornstarch.','Mix the sauce ingredients; taste and adjust sweetness/tartness to your liking.','Soak the tangerine peel, chilies, and star anise in room-temperature water 2 minutes; drain.','Heat the frying oil to 350°F. Shallow-fry the chicken in 2 batches until golden, 3 to 4 minutes, turning halfway.','Remove most of the oil, leaving about 1 tbsp. Toast the tangerine peel, chilies, and star anise over medium-low heat 30 seconds. Add the ginger and garlic; cook 10 seconds.','Add the sauce; bring to a simmer. Stir in the cornstarch slurry gradually until the sauce coats a spoon.','Add the chicken and scallions; toss quickly and serve.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Orange Chicken.'},
-{id:'entree-sesame-chicken',group:'Entrees: Chinese & Japanese',style:'Chicken',name:'Sesame Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/sesame-chicken/',
+{id:'entree-sesame-chicken',group:'Entrees: Chinese',style:'Chicken',name:'Sesame Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/sesame-chicken/',
  ing:[['#','Chicken'],['chicken','Boneless, skinless chicken thighs, cut into 1" chunks',450,'g',0],['corn1','Cornstarch',8,'g',.33],['paste','Sesame paste',5,'g',LQ],['salt1','Salt',1.5,'g',SA],['wine1','Shaoxing wine',5,'g',LQ],
   ['#','Dry coating'],['flour','Unbleached all-purpose flour',30,'g',FL],['seeds','Toasted sesame seeds',18,'g',0],['pepper1','White pepper',0.3,'g',1],
   ['#','Sauce'],['oil1','Canola oil',10,'g',LQ],['garlic','Garlic, minced',3,'g',.33],['wine2','Shaoxing wine',15,'g',LQ],['stock','Chicken stock',180,'g',LQ],['vinegar','Rice wine vinegar',2.5,'g',LQ],['sugar','Sugar',38,'g',SG],['soy','Soy sauce',15,'g',LQ],['dsoy','Dark soy sauce',5,'g',LQ],['sesame2','Sesame oil',10,'g',LQ],['corn2','Cornstarch (for slurry)',16,'g',.33],['water','Water (for slurry)',30,'g',LQ],['scallion','Scallion, chopped',10,'g',0]],
  st:['Mix the chicken with the cornstarch, sesame paste, salt, and Shaoxing wine. Marinate 20 minutes.','Mix the flour, sesame seeds, and white pepper in a separate bowl. Heat the oven to 475°F.','Dredge the marinated chicken in the dry coating. Place on a parchment-lined sheet pan.','Bake 8 minutes on the top rack, then flip and broil on low 3 minutes until golden.','Heat the oil in a wok over medium heat with the garlic; stir 5 seconds. Add the Shaoxing wine, then immediately the stock, vinegar, sugar, soy sauces, and sesame oil. Bring to a simmer.','Stir in the cornstarch slurry gradually until the sauce coats a spoon, about 20 seconds.','Add the chicken and scallions; toss to coat. Garnish with extra toasted sesame seeds.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Baked Sesame Chicken (their oven-fried version; they also publish a deep-fried restaurant-style version in their cookbook that isn\u2019t posted online with full measurements).'},
-{id:'entree-kungpao-chicken',group:'Entrees: Chinese & Japanese',style:'Chicken',name:'Kung Pao Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/kung-pao-chicken/',
+{id:'entree-kungpao-chicken',group:'Entrees: Chinese',style:'Chicken',name:'Kung Pao Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://thewoksoflife.com/kung-pao-chicken/',
  ing:[['#','Roasted peanuts (or use pre-roasted and skip this step)'],['oil1','Vegetable oil',5,'g',LQ],['peanuts','Raw peanuts, shelled',150,'g',0],
   ['#','Marinade'],['chicken','Chicken breast, cut into 3/4" cubes',340,'g',0],['oil2','Vegetable oil',5,'g',LQ],['corn1','Cornstarch',3,'g',.33],['wine1','Shaoxing wine',5,'g',LQ],['salt','Salt',0.75,'g',SA],['pepper1','White pepper, pinch',0.2,'g',1],
   ['#','Sauce'],['soy','Light soy sauce',15,'g',LQ],['dsoy','Dark soy sauce',2.5,'g',LQ],['vinegar','Rice wine vinegar',15,'g',LQ],['sugar','Sugar',4,'g',SG],['water1','Water',45,'g',LQ],['corn2','Cornstarch',3,'g',.33],
   ['#','Rest of the dish'],['oil3','Oil',43,'g',LQ],['garlic','Garlic, smashed and sliced',9,'g',.33],['ginger','Fresh ginger, thin slices',2,'g',1],['chili','Dried red chilies, deseeded and chopped',1,'g',0],['sichuan','Sichuan peppercorn powder',1,'g',1],['scallion','Scallions, white parts only',30,'g',0]],
- st:['If roasting your own peanuts: heat the oil, add the peanuts, and stir constantly over medium heat 3 minutes. Cool completely.','Marinate the chicken in the marinade ingredients 20 minutes.','Mix the sauce ingredients; set aside.','Heat 2 tbsp oil in a wok over high heat. Sear the chicken, then remove to a bowl.','Turn heat to low, add the remaining oil, garlic, ginger, chilies, Sichuan peppercorn powder, and scallions. Cook 1 to 2 minutes until fragrant.','Return the chicken to the wok, heat to high, and stir-fry 1 minute. Stir up the sauce and add it; stir-fry until it thickens quickly.','Add the peanuts, stir, and serve.'],
+ st:['If roasting your own peanuts: heat the oil, add the peanuts, and stir constantly over medium heat 3 minutes. Cool completely.','Marinate the chicken in the marinade ingredients 20 minutes.','Mix the sauce ingredients; set aside.','Heat about {ing:oil3:0.65} of the oil in a wok over high heat. Sear the chicken, then remove to a bowl.','Turn heat to low, add the remaining oil, garlic, ginger, chilies, Sichuan peppercorn powder, and scallions. Cook 1 to 2 minutes until fragrant.','Return the chicken to the wok, heat to high, and stir-fry 1 minute. Stir up the sauce and add it; stir-fry until it thickens quickly.','Add the peanuts, stir, and serve.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Kung Pao Chicken.'},
-{id:'entree-teriyaki-chicken',group:'Entrees: Chinese & Japanese',style:'Chicken',name:'Japanese Chicken Teriyaki',u:['serving','servings'],b:6,c:[4,6,8,10],d:6,min:1,max:20,k:'n',v:1,url:'https://thewoksoflife.com/mall-chicken-teriyaki/',
+{id:'entree-teriyaki-chicken',group:'Entrees: Japanese',style:'Chicken',name:'Japanese Chicken Teriyaki',u:['serving','servings'],b:6,c:[4,6,8,10],d:6,min:1,max:20,k:'n',v:1,url:'https://thewoksoflife.com/mall-chicken-teriyaki/',
  ing:[['chicken','Boneless, skinless chicken thighs, cut into small chunks',900,'g',0],['mirin','Mirin',53,'g',LQ],['soy','Soy sauce',53,'g',LQ],['dsoy','Dark soy sauce',7.5,'g',LQ],['sugar','Brown sugar',27,'g',SG],['ginger','Fresh ginger, grated',5,'g',1],['sesame','Sesame oil',7.5,'g',LQ],['corn','Cornstarch',8,'g',.33],['oil','Oil, for searing',28,'g',LQ]],
  st:['Combine the chicken with the mirin, soy sauce, dark soy sauce, brown sugar, ginger, sesame oil, and cornstarch. Marinate 2 hours.','Heat the oil in a wok or large skillet over medium-high heat. Transfer the chicken to the pan in one layer, reserving the marinade. Sear one side 1 minute, then stir-fry 1 minute more.','Add the reserved marinade. Reduce heat to medium and simmer until the sauce thickens and coats the chicken.','Serve over rice.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s "Mall Chicken Teriyaki" \u2014 their take on the food-court classic, Japanese-American in style.'},
-{id:'entree-fried-rice',group:'Entrees: Chinese & Japanese',style:'Rice',name:'Egg Fried Rice',u:['serving','servings'],b:6,c:[2,4,6,8],d:6,min:1,max:20,k:'n',v:1,url:'https://thewoksoflife.com/egg-fried-rice/',
+{id:'entree-fried-rice',group:'Entrees: Chinese',style:'Rice',name:'Egg Fried Rice',u:['serving','servings'],b:6,c:[2,4,6,8],d:6,min:1,max:20,k:'n',v:1,url:'https://thewoksoflife.com/egg-fried-rice/',
  ing:[['rice','Cooked rice, day-old if possible',900,'g',0],['egg','Large eggs (3 beaten plain, 2 beaten with water and spices \u2014 see method)',250,'g','egg'],['paprika','Paprika',0.5,'g',1],['turmeric','Turmeric',0.5,'g',1],['water','Water (mixed into the spiced eggs)',30,'g',LQ],['oil','Oil, divided',42,'g',LQ],['onion','Onion, finely chopped',110,'g',0],['pepper','Red bell pepper, finely chopped',50,'g',0],['peas','Frozen peas, thawed',75,'g',0],['salt','Salt',9,'g',SA],['sugar','Sugar',1,'g',SG],['bpepper','Black pepper',0.5,'g',1],['scallion','Scallions, chopped',20,'g',0]],
- st:['Fluff the cooked rice with a fork, breaking up any clumps.','Beat 3 of the eggs plain in one bowl. Beat the remaining eggs with the water, paprika, and turmeric in another bowl.','Heat a wok over medium-high heat with 2 tbsp oil. Scramble the 3 plain eggs; remove and set aside.','Heat the wok over high heat with the last of the oil. Add the onion and bell pepper; stir-fry 1 to 2 minutes.','Add the rice; stir-fry 2 minutes, breaking up clumps. Pour the spiced egg mixture over the rice; stir-fry 1 minute until coated.','Add the peas; stir-fry 1 minute. Spread the salt, sugar, and black pepper over the rice and mix.','If dry, sprinkle in a little water or stock. Mix in the scrambled eggs and scallions, and serve.'],
+ st:['Fluff the cooked rice with a fork, breaking up any clumps.','Beat 3 of the eggs plain in one bowl. Beat the remaining eggs with the water, paprika, and turmeric in another bowl.','Heat a wok over medium-high heat with about {ing:oil:0.667} of the oil. Scramble the plain eggs; remove and set aside.','Heat the wok over high heat with the last of the oil. Add the onion and bell pepper; stir-fry 1 to 2 minutes.','Add the rice; stir-fry 2 minutes, breaking up clumps. Pour the spiced egg mixture over the rice; stir-fry 1 minute until coated.','Add the peas; stir-fry 1 minute. Spread the salt, sugar, and black pepper over the rice and mix.','If dry, sprinkle in a little water or stock. Mix in the scrambled eggs and scallions, and serve.'],
  nt:'Published recipe \u2014 The Woks of Life\u2019s Egg Fried Rice.'},
 {id:'entree-meatloaf',group:'Entrees: American',style:'Beef',name:'Meatloaf with Glaze',u:['serving','servings'],b:8,c:[4,8,12],d:8,min:1,max:24,k:'n',v:1,url:'https://natashaskitchen.com/meatloaf-recipe/',
  ing:[['#','Meatloaf'],['beef','Ground beef, 85-90% lean',907,'g',0],['onion','Onion, finely chopped',150,'g',0],['egg','Large eggs',100,'g','egg'],['garlic','Garlic, minced',9,'g',.33],['ketchup1','Ketchup',45,'g',LQ],['parsley','Fresh parsley, finely chopped',11,'g',1],['panko','Panko breadcrumbs',68,'g',0],['milk','Milk',80,'g',LQ],['salt1','Salt',9,'g',SA],['italian','Italian seasoning',4,'g',1],['pepper1','Black pepper',0.5,'g',.5],['paprika','Paprika',1,'g',1],
@@ -554,7 +615,7 @@ var R=[
   ['#','Wrapping & finish'],['ham','Parma ham or prosciutto, thin slices',120,'g',0],['pastry','All-butter puff pastry',500,'g',0],['egg','Egg yolks, beaten (for egg wash)',36,'g','egg']],
  st:['Season the fillet all over with salt and pepper. Sear in a hot pan with the olive oil, 30 to 60 seconds per side, until browned but still rare inside. Let cool, then brush all over with the mustard.','For the duxelles, pulse the mushrooms and shallots in a food processor until finely minced. Cook in a dry pan over medium-high heat with the thyme, stirring often, until all the moisture evaporates and you\u2019re left with a dry paste, about 10 minutes. Cool completely.','Lay a large sheet of plastic wrap on the counter. Arrange the ham slices overlapping in a rectangle large enough to wrap the fillet. Spread the duxelles evenly over the ham.','Place the mustard-coated fillet on top. Using the plastic wrap, roll the ham tightly around the beef into an even log. Twist the ends and chill at least 30 minutes.','Roll the puff pastry into a rectangle large enough to fully enclose the beef. Unwrap the beef log and place it on the pastry; wrap and seal the seams, trimming excess. Chill again 15 to 20 minutes.','Brush all over with the egg yolk. Score the pastry lightly in a crosshatch pattern. Chill 10 more minutes.','Bake at 400°F for 35 to 40 minutes, until the pastry is deep golden and the center reaches 125°F for medium-rare. Rest 10 minutes before slicing.'],
  nt:'This follows the well-known structure of Gordon Ramsay\u2019s published Beef Wellington \u2014 mustard-coated fillet, mushroom duxelles, prosciutto, puff pastry \u2014 which is widely republished across his shows and site. His exact gram amounts for the mushrooms and pastry vary slightly between different published versions of his own recipe, so these are the commonly cited amounts rather than one single page copied exactly.',an:'No altitude adjustment \u2014 this isn\u2019t leavened.'},
-{id:'entree-lasagna',group:'Entrees: Italian',style:'Pasta',name:'Lasagna Bolognese',u:['serving','servings'],b:8,c:[6,8,10,12],d:8,min:1,max:24,k:'n',
+{id:'entree-lasagna',group:'Entrees: Italian',style:'Pasta',name:'Lasagna Bolognese',u:['serving','servings'],b:8,c:[6,8,10,12],d:8,min:1,max:24,k:'n',pan:{label:'9×13" dish',plural:'9×13" dishes',each:1},
  ing:[['#','Bolognese'],['oil','Olive oil',28,'g',LQ],['beef','Ground beef',454,'g',0],['pork','Ground pork',227,'g',0],['onion','Onion, finely chopped',150,'g',0],['carrot','Carrot, finely chopped',65,'g',0],['celery','Celery, finely chopped',50,'g',0],['garlic','Garlic, minced',9,'g',.33],['paste','Tomato paste',90,'g',LQ],['wine','Red wine',180,'g',LQ],['milk1','Whole milk',240,'g',LQ],['tomato','Crushed tomatoes (one 28oz can)',794,'g',LQ],['salt1','Salt',6,'g',SA],['pepper1','Black pepper',2,'g',.5],['italian','Italian seasoning',4,'g',1],
   ['#','B\u00e9chamel'],['butter','Butter',57,'g',BU],['flour','Unbleached all-purpose flour',60,'g',FL],['milk2','Whole milk',950,'g',LQ],['nutmeg','Ground nutmeg, a pinch',0.5,'g',1],['salt2','Salt',3,'g',SA],
   ['#','Assembly'],['noodles','Lasagna noodles (about 12 sheets)',340,'g',0],['mozz','Mozzarella, shredded',340,'g',0],['parm','Parmesan, grated',100,'g',.48]],
@@ -573,7 +634,7 @@ var R=[
   ['#','Risotto'],['butter2','Butter',14,'g',BU],['garlic2','Garlic, minced',3,'g',.33],['eschallot','Eschallots / French onions, finely chopped (or 1/2 onion)',60,'g',0],['wine','Dry white wine',60,'g',LQ],['rice','Arborio rice',250,'g',0],['stock','Chicken broth/stock, low sodium, warm',1200,'g',LQ],
   ['#','Finishes'],['cream','Heavy cream (optional but recommended)',120,'g',LQ],['butter3','Butter (optional)',30,'g',BU],['parm','Parmesan, finely grated',50,'g',.48],['salt2','Salt and pepper, each',3,'g',SA],
   ['#','Serving'],['parsley','Parsley or chives, chopped',5,'g',1],['parmserve','Parmesan, extra, grated',15,'g',.48]],
- st:['Heat 1 tbsp of the oil and half the butter in a large heavy pot over high heat. Cook half the mushrooms until golden, about 4 minutes. Add half the garlic, salt, and pepper; cook 1.5 minutes more. Remove to a bowl. Repeat with the rest.','Turn heat to medium. In the same pot, melt the risotto butter, then add the garlic and eschallots. Cook 2 minutes until translucent but not golden.','Add the wine; simmer rapidly 2 minutes, scraping the base, until mostly evaporated.','Add the rice; stir 1 minute until semi-translucent.','Add about 1.5 cups of the warm stock. Stir, then let sit 3 minutes, stirring occasionally, until mostly absorbed. Repeat 3 more times until all the stock is used, the rice is just cooked but the risotto is still creamy and a little sloppy, about 12 minutes total.','Add the cream and finishing butter; stir vigorously until creamy.','Stir in the parmesan, salt, and pepper.','Stir in half the mushrooms. Taste and adjust seasoning \u2014 it should be creamy, not stodgy.','Reheat the remaining mushrooms. Spoon the risotto into bowls, top with the reserved mushrooms, and garnish with parsley and extra parmesan.'],
+ st:['Heat about {ing:oil1:0.5} of the oil and half the butter in a large heavy pot over high heat. Cook half the mushrooms until golden, about 4 minutes. Add half the garlic, salt, and pepper; cook 1.5 minutes more. Remove to a bowl. Repeat with the rest.','Turn heat to medium. In the same pot, melt the risotto butter, then add the garlic and eschallots. Cook 2 minutes until translucent but not golden.','Add the wine; simmer rapidly 2 minutes, scraping the base, until mostly evaporated.','Add the rice; stir 1 minute until semi-translucent.','Add about {ing:stock:0.25} of the warm stock \u2014 roughly a quarter of the total. Stir, then let sit 3 minutes, stirring occasionally, until mostly absorbed. Repeat 3 more times with the remaining stock in the same proportions, until it\u2019s all used, the rice is just cooked but the risotto is still creamy and a little sloppy, about 12 minutes total.','Add the cream and finishing butter; stir vigorously until creamy.','Stir in the parmesan, salt, and pepper.','Stir in half the mushrooms. Taste and adjust seasoning \u2014 it should be creamy, not stodgy.','Reheat the remaining mushrooms. Spoon the risotto into bowls, top with the reserved mushrooms, and garnish with parsley and extra parmesan.'],
  nt:'Published recipe \u2014 RecipeTin Eats\u2019 Mushroom Risotto. Nagi\u2019s own note: there\u2019s no need to stir constantly for 30 minutes \u2014 adding stock in 3 to 4 batches with occasional stirring works just as well in a wide pot.'},
 {id:'entree-chickenparm',group:'Entrees: Italian',style:'Chicken',name:'Stuffed Chicken Parmesan',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://natashaskitchen.com/stuffed-chicken-parmesan-recipe/',
  ing:[['chicken','Boneless, skinless chicken breasts (4 medium)',680,'g',0],['salt1','Salt',4,'g',SA],['pepper1','Black pepper',1,'g',.5],['mozz1','Mozzarella, for stuffing',170,'g',0],['flour','Unbleached all-purpose flour',40,'g',FL],['egg','Large eggs',100,'g','egg'],['panko','Plain breadcrumbs, such as panko',45,'g',0],['parm1','Parmesan, finely grated',35,'g',.48],['oil','Extra light olive oil, for frying (plus more as needed)',40,'g',LQ],['marinara','Marinara sauce',480,'g',LQ],['mozz2','Mozzarella, remaining',170,'g',0],['basil','Fresh basil, finely chopped, to garnish',5,'g',1]],
@@ -626,12 +687,65 @@ var R=[
  nt:'Adapted \u2014 a standard beef empanada built from classic dough and filling technique, not tied to one named source.'},
 {id:'entree-chickenenchiladas',group:'Entrees: Mexican',style:'Chicken',name:'Chicken Enchiladas',u:['serving','servings'],b:5,c:[4,5,6,10],d:5,min:1,max:20,k:'n',
  ing:[['chicken','Cooked, shredded chicken',400,'g',0],['tortilla','Corn tortillas, about 10',270,'g',0],['sauce','Red enchilada sauce',480,'g',LQ],['cheese','Shredded Mexican-blend or cheddar cheese',225,'g',0],['onion','Onion, finely chopped',55,'g',0],['oil','Oil (for softening tortillas)',30,'g',LQ],['cumin','Cumin',2,'g',1],['salt','Salt',2,'g',SA]],
- st:['Heat the oven to 375°F. Toss the shredded chicken with the onion, cumin, salt, and about 1/4 cup of the enchilada sauce.','Briefly warm each tortilla in a little oil in a skillet, just until pliable, a few seconds per side.','Dip each tortilla in the enchilada sauce, fill with chicken and a little cheese, roll, and place seam-side down in a baking dish.','Pour the remaining sauce over the top and sprinkle with the remaining cheese.','Bake 20 minutes, until bubbling and the cheese is melted.'],
+ st:['Heat the oven to 375°F. Toss the shredded chicken with the onion, cumin, salt, and about {ing:sauce:0.125} of the enchilada sauce.','Briefly warm each tortilla in a little oil in a skillet, just until pliable, a few seconds per side.','Dip each tortilla in the enchilada sauce, fill with chicken and a little cheese, roll, and place seam-side down in a baking dish.','Pour the remaining sauce over the top and sprinkle with the remaining cheese.','Bake 20 minutes, until bubbling and the cheese is melted.'],
  nt:'Adapted \u2014 standard chicken enchilada technique, not tied to one named source.'},
 {id:'entree-beefenchiladas',group:'Entrees: Mexican',style:'Beef',name:'Beef Enchiladas',u:['serving','servings'],b:5,c:[4,5,6,10],d:5,min:1,max:20,k:'n',
  ing:[['beef','Ground beef',454,'g',0],['onion','Onion, finely chopped',110,'g',0],['garlic','Garlic, minced',6,'g',.33],['tortilla','Corn tortillas, about 10',270,'g',0],['sauce','Red enchilada sauce',480,'g',LQ],['cheese','Shredded Mexican-blend or cheddar cheese',225,'g',0],['cumin','Cumin',2,'g',1],['chili','Chili powder',2,'g',.4],['salt','Salt',3,'g',SA],['oil','Oil (for softening tortillas)',30,'g',LQ]],
- st:['Heat the oven to 375°F. Brown the beef with the onion and garlic; drain excess fat. Season with cumin, chili powder, and salt. Stir in about 1/4 cup of the enchilada sauce.','Briefly warm each tortilla in a little oil in a skillet, just until pliable, a few seconds per side.','Dip each tortilla in the enchilada sauce, fill with the beef mixture and a little cheese, roll, and place seam-side down in a baking dish.','Pour the remaining sauce over the top and sprinkle with the remaining cheese.','Bake 20 minutes, until bubbling and the cheese is melted.'],
- nt:'Adapted \u2014 standard beef enchilada technique, not tied to one named source.'}
+ st:['Heat the oven to 375°F. Brown the beef with the onion and garlic; drain excess fat. Season with cumin, chili powder, and salt. Stir in about {ing:sauce:0.125} of the enchilada sauce.','Briefly warm each tortilla in a little oil in a skillet, just until pliable, a few seconds per side.','Dip each tortilla in the enchilada sauce, fill with the beef mixture and a little cheese, roll, and place seam-side down in a baking dish.','Pour the remaining sauce over the top and sprinkle with the remaining cheese.','Bake 20 minutes, until bubbling and the cheese is melted.'],
+ nt:'Adapted \u2014 standard beef enchilada technique, not tied to one named source.'},
+{id:'entree-lobsterrolls',group:'Entrees: American',style:'Seafood',name:'Lobster Rolls',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://www.foodiecrush.com/lobster-rolls/',
+ ing:[['lobster','Lobster meat, thawed or cooked',454,'g',0],['celery','Celery, minced',30,'g',0],['mayo','Mayonnaise',56,'g',LQ],['chives','Fresh chives, minced',3,'g',1],['lemonjuice','Lemon juice',15,'g',LQ],['lemonzest','Lemon zest',2,'g',0],['salt','Kosher salt',1.5,'g',SA],['pepper','Black pepper',0.5,'g',.5],['buns','Split-top brioche hot dog buns, about 4',160,'g',0],['butter','Butter, divided',57,'g',BU]],
+ st:['Rinse the lobster meat, pick through for shells, and drain thoroughly. Chop or tear into large chunks.','In a large bowl, mix the celery, mayonnaise, chives, lemon juice, lemon zest, salt, and pepper.','Melt half the butter in a large skillet over medium heat. Add the lobster meat and cook, stirring, 2 minutes until warmed through. Use a slotted spoon to transfer it to the mayonnaise mixture and toss to coat.','Wipe out the skillet and melt the remaining butter. Toast the buns on the cut sides, about 2 minutes per side, until golden.','Load each bun with the lobster mixture and garnish with more chives. Serve with potato chips.'],
+ nt:'Published recipe \u2014 FoodieCrush\u2019s Lobster Rolls.'},
+{id:'entree-phillycheesesteak',group:'Entrees: American',style:'Sandwiches',name:'Philly Cheesesteak',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',v:1,url:'https://natashaskitchen.com/philly-cheesesteak/',
+ ing:[['steak','Ribeye steak, trimmed and thinly sliced',454,'g',0],['salt1','Sea salt',3,'g',SA],['pepper','Black pepper',1,'g',.5],['onion','Sweet onion, large, diced',150,'g',0],['cheese','Provolone cheese slices, mild',180,'g',0],['rolls','Hoagie rolls, sliced 3/4 through, about 4',340,'g',0],['butter','Unsalted butter, softened',28,'g',BU],['garlic','Garlic clove, pressed',3,'g',.33],['mayo','Mayonnaise',45,'g',LQ],['oil','Oil, for the pan',30,'g',LQ]],
+ st:['Slice the hoagie rolls 3/4 of the way through. Dice the onion and thinly slice the beef (freeze 20 to 30 minutes first for easier slicing).','Stir the softened butter with the pressed garlic. Spread onto the cut sides of the rolls and toast on a hot skillet or griddle until golden; set aside.','Add 1 tbsp oil to the pan and sauté the onion until softened; sprinkle lightly with salt, cook until caramelized, then transfer to a bowl.','Increase to high heat, add the remaining oil, and spread the beef in an even layer. Brown a couple minutes undisturbed, then flip and season with the salt and pepper. Cook until fully cooked through, then stir in the caramelized onions.','Divide into 4 portions, top each with 2 slices of cheese, and turn off the heat so the cheese melts without overcooking the meat.','Spread a thin layer of mayo on the toasted rolls. Use a spatula to scrape each cheesy beef portion into a roll. Serve warm.'],
+ nt:'Published recipe \u2014 Natasha\u2019s Kitchen\u2019s Philly Cheesesteak.'},
+{id:'copycat-steakgorgonzola',group:'Entrees: Copycat',style:'Olive Garden',name:'Steak Gorgonzola Alfredo',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',
+ ing:[['steak','Sirloin steak, sliced',454,'g',0],['pasta','Fettuccine',340,'g',0],['butter','Butter',85,'g',BU],['cream','Heavy cream',300,'g',LQ],['parm','Parmesan, grated',60,'g',.48],['gorgonzola','Gorgonzola, crumbled',115,'g',0],['garlic','Garlic, minced',9,'g',.33],['balsamic','Balsamic glaze, to finish (optional)',30,'g',LQ],['salt','Salt and pepper',3,'g',SA]],
+ st:['Cook the fettuccine in well-salted boiling water until al dente; drain.','Season the steak with salt and pepper. Sear in a hot pan to your preferred doneness; rest, then slice.','In the same pan, melt the butter and cook the garlic 30 seconds. Add the cream; simmer 2 minutes.','Stir in the parmesan and gorgonzola until melted and smooth.','Toss the pasta with the sauce. Top with the sliced steak and a drizzle of balsamic glaze.'],
+ nt:'Adapted \u2014 a standard Olive Garden-style Steak Gorgonzola Alfredo copycat; not tied to one named source.'},
+{id:'copycat-longhornchicken',group:'Entrees: Copycat',style:'LongHorn Steakhouse',name:'Parmesan Crusted Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',
+ ing:[['chicken','Boneless, skinless chicken breasts',680,'g',0],['dressing1','Italian dressing (marinade)',120,'g',LQ],['dressing2','Ranch dressing',60,'g',LQ],['parm','Parmesan, grated (mixed into ranch)',30,'g',.48],['panko','Panko breadcrumbs',60,'g',0],['butter','Butter, melted',28,'g',BU],['garlicpow','Garlic powder',2,'g',1],['provolone','Provolone cheese slices',90,'g',0]],
+ st:['Marinate the chicken in the Italian dressing 30 minutes to overnight.','Grill or pan-sear the chicken until just cooked through.','Mix the ranch dressing with the grated parmesan.','Mix the panko with the melted butter and garlic powder.','Top each chicken breast with a slice of provolone, then the ranch-parmesan mixture, then the buttered panko.','Broil 2 to 3 minutes until the topping is golden and bubbling.'],
+ nt:'Adapted \u2014 a standard LongHorn Steakhouse-style Parmesan Crusted Chicken copycat. I wasn\u2019t able to confirm Chefjar\u2019s exact published numbers, so this is a sound representative version rather than a copy of their specific recipe.'},
+{id:'copycat-alicesprings',group:'Entrees: Copycat',style:'Outback Steakhouse',name:'Alice Springs Chicken',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',
+ ing:[['chicken','Boneless, skinless chicken breasts',680,'g',0],['mayo','Mayonnaise',60,'g',LQ],['honey','Honey',45,'g',LQ],['mustard','Dijon mustard',30,'g',LQ],['bacon','Bacon, cooked',170,'g',0],['mushroom','Mushrooms, sliced and sautéed',170,'g',0],['cheese','Shredded Monterey Jack and cheddar, combined',170,'g',0]],
+ st:['Whisk the mayonnaise, honey, and Dijon mustard together for the sauce; reserve half for serving.','Marinate the chicken in the remaining sauce for at least 30 minutes.','Sear or grill the chicken until just cooked through.','Top each piece with sautéed mushrooms, bacon, and the shredded cheese.','Broil or bake until the cheese is melted and bubbling. Drizzle with the reserved honey mustard sauce.'],
+ nt:'Adapted \u2014 a standard Outback Steakhouse-style Alice Springs Chicken copycat. I wasn\u2019t able to confirm Culinary Hill\u2019s exact published numbers, so this is a sound representative version rather than a copy of their specific recipe.'},
+{id:'copycat-chickenmadeira',group:'Entrees: Copycat',style:'Cheesecake Factory',name:'Chicken Madeira',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',
+ ing:[['chicken','Boneless, skinless chicken breasts',680,'g',0],['flour','Unbleached all-purpose flour, for dredging',30,'g',FL],['asparagus','Asparagus, trimmed',225,'g',0],['mushroom','Mushrooms, sliced',225,'g',0],['madeira','Madeira wine',180,'g',LQ],['stock','Beef broth',240,'g',LQ],['butter','Butter',57,'g',BU],['mozz','Mozzarella, sliced',170,'g',0]],
+ st:['Lightly dredge the chicken in flour. Pan-sear in butter until golden and cooked through; set aside.','Blanch or sauté the asparagus until just tender; set aside.','In the same pan, sauté the mushrooms until browned.','Add the Madeira wine; simmer 2 to 3 minutes to cook off the alcohol. Add the beef broth and simmer until reduced and slightly thickened, about 8 to 10 minutes.','Return the chicken to the pan, top with the asparagus and mozzarella.','Cover and cook until the cheese melts. Spoon the Madeira sauce over the top to serve.'],
+ nt:'Adapted \u2014 a standard Cheesecake Factory-style Chicken Madeira copycat. I wasn\u2019t able to confirm Natasha\u2019s Kitchen\u2019s exact published numbers, so this is a sound representative version rather than a copy of their specific recipe.'},
+{id:'copycat-louisianachicken',group:'Entrees: Copycat',style:'Cheesecake Factory',name:'Louisiana Chicken Pasta',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',
+ ing:[['chicken','Boneless, skinless chicken breasts',680,'g',0],['flour','Unbleached all-purpose flour, for dredging',60,'g',FL],['cajun','Cajun seasoning',15,'g',1],['pasta','Farfalle (bowtie) pasta',340,'g',0],['cream','Heavy cream',240,'g',LQ],['stock','Chicken broth',120,'g',LQ],['pepper1','Bell peppers, sliced',150,'g',0],['parm','Parmesan, grated',50,'g',.48],['garlic','Garlic, minced',9,'g',.33],['butter','Butter',57,'g',BU]],
+ st:['Season the chicken with half the Cajun seasoning, then dredge in flour. Pan-fry in butter until golden and cooked through; slice and set aside.','In the same pan, sauté the bell peppers and garlic until softened.','Add the cream, chicken broth, and remaining Cajun seasoning; simmer 3 to 4 minutes.','Stir in the parmesan until melted and smooth.','Toss the cooked pasta with the sauce. Top with the sliced chicken.'],
+ nt:'Adapted \u2014 a standard Cheesecake Factory-style Louisiana Chicken Pasta copycat. I wasn\u2019t able to confirm Dinner, then Dessert\u2019s exact published numbers, so this is a sound representative version rather than a copy of their specific recipe.'},
+{id:'copycat-mongolianbeef',group:'Entrees: Copycat',style:'P.F. Chang\u2019s',name:'Mongolian Beef',u:['serving','servings'],b:2,c:[2,4,6],d:2,min:1,max:12,k:'n',v:1,url:'https://www.pfchangs.com/',
+ ing:[['beef','Beef tenderloin or flank steak, thinly sliced',340,'g',0],['oil','Soybean or vegetable oil',14,'g',LQ],['garlic','Garlic, minced',2,'g',1],['soy','Soy sauce',60,'g',LQ],['sugar','Sugar',25,'g',SG],['wine','Rice wine',5,'g',LQ],['scallions','Green onions, cut into 3" sticks',57,'g',0],['sesameoil','Sesame oil, to finish',5,'g',LQ]],
+ st:['Heat the oil in a sauté pan or wok over high heat. Add the beef and cook 30 to 60 seconds, until lightly browned at the edges and just cooked through.','Add the garlic and toss.','Add the rice wine, soy sauce, and sugar. Bring to a boil.','Cook, tossing, until the sauce reduces and caramelizes onto the beef and the pan is dry \u2014 no pooling sauce.','Add the green onion sticks and toss just to incorporate; don\u2019t let them wilt.','Finish with the sesame oil. Serve over steamed rice.'],
+ nt:'Published recipe \u2014 this is P.F. Chang\u2019s own published Mongolian Beef recipe from their site (the gluten-free version they publish, made with gluten-free soy sauce). I wasn\u2019t able to confirm Dinner, then Dessert\u2019s specific copycat numbers, so I used the restaurant\u2019s own recipe instead, which should be at least as close to the real thing.'},
+{id:'copycat-lettucewraps',group:'Entrees: Copycat',style:'P.F. Chang\u2019s',name:'Chicken Lettuce Wraps',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',
+ ing:[['chicken','Ground chicken',454,'g',0],['waterchestnut','Water chestnuts, finely chopped',115,'g',0],['garlic','Garlic, minced',9,'g',.33],['ginger','Fresh ginger, minced',5,'g',1],['greenonion','Green onion, sliced',20,'g',0],['hoisin','Hoisin sauce',45,'g',LQ],['soy','Soy sauce',30,'g',LQ],['vinegar','Rice vinegar',15,'g',LQ],['sesameoil','Sesame oil',7,'g',LQ],['sriracha','Sriracha (optional)',5,'g',LQ],['lettuce','Butter lettuce leaves, separated, about 12',120,'g',0]],
+ st:['Heat a splash of oil in a skillet over medium-high heat. Cook the ground chicken, breaking it up, until no longer pink.','Add the garlic and ginger; cook 30 seconds.','Stir in the water chestnuts, hoisin, soy sauce, rice vinegar, sesame oil, and sriracha. Cook 2 to 3 minutes until heated through and slightly glossy.','Stir in the green onion.','Serve spooned into butter lettuce leaves to wrap and eat.'],
+ nt:'Adapted \u2014 a standard P.F. Chang\u2019s-style Chicken Lettuce Wraps copycat. I wasn\u2019t able to confirm Damn Delicious\u2019 exact published numbers, so this is a sound representative version rather than a copy of their specific recipe.'},
+{id:'copycat-orangechicken',group:'Entrees: Copycat',style:'Panda Express',name:'Orange Chicken',u:['serving','servings'],b:6,c:[4,6,8],d:6,min:1,max:16,k:'n',v:1,url:'https://dinnerthendessert.com/panda-express-orange-chicken-copycat/',
+ ing:[['#','Chicken'],['chicken','Boneless, skinless chicken thighs, cut into 1" pieces',900,'g',0],['egg','Large egg',50,'g','egg'],['salt','Salt',7.5,'g',SA],['pepper','Black pepper, a pinch',0.3,'g',.5],['oil1','Oil, divided, plus more for frying',14,'g',LQ],['corn','Cornstarch, plus 1 tbsp',130,'g',.33],['flour','Unbleached all-purpose flour',30,'g',FL],
+  ['#','Sauce'],['ginger','Fresh ginger root, minced',14,'g',1],['garlic','Garlic, minced',6,'g',.33],['chili','Hot red chili pepper, crushed',2,'g',.5],['greenonion','Green onions, chopped',40,'g',0],['wine','Shaoxing rice wine',30,'g',LQ],['water1','Water',60,'g',LQ],['sesameoil','Sesame oil',5,'g',LQ],['soy','Soy sauce',45,'g',LQ],['water2','Water',45,'g',LQ],['sugar','Sugar',200,'g',SG],['vinegar','White vinegar',200,'g',LQ],['zest','Orange zest (about 2 oranges)',8,'g',0]],
+ st:['Whisk the egg, salt, pepper, and 1 tbsp of the oil together. Toss the chicken pieces in this mixture.','Whisk the cornstarch and flour together, then toss the chicken in it to coat.','Heat oil for frying to 350°F. Fry the chicken in batches 3 to 4 minutes until golden and cooked through. Drain on a rack.','For the sauce, heat the remaining 1 tbsp oil in a wok over medium-high heat. Add the ginger, garlic, chili, and green onions; cook 30 seconds.','Add the rice wine, water, sesame oil, soy sauce, the second measure of water, sugar, vinegar, and orange zest. Bring to a simmer.','Toss the fried chicken in the sauce until well coated and glossy. Serve immediately over rice.'],
+ nt:'Published recipe \u2014 Dinner, then Dessert\u2019s Panda Express Orange Chicken copycat.'},
+{id:'copycat-adobochicken',group:'Entrees: Copycat',style:'Chipotle',name:'Adobo Chicken',u:['serving','servings'],b:6,c:[4,6,8],d:6,min:1,max:16,k:'n',
+ ing:[['chicken','Boneless, skinless chicken thighs',900,'g',0],['chipotle','Chipotle peppers in adobo sauce, minced',30,'g',0],['adobo','Adobo sauce (from the can)',30,'g',LQ],['garlic','Garlic, minced',9,'g',.33],['cumin','Cumin',4,'g',1],['oregano','Dried oregano',2,'g',1],['lime','Lime juice',30,'g',LQ],['oil','Oil',30,'g',LQ],['salt','Salt',6,'g',SA]],
+ st:['Blend the chipotle peppers, adobo sauce, garlic, cumin, oregano, lime juice, oil, and salt into a marinade.','Coat the chicken thighs in the marinade. Marinate at least 30 minutes, or up to overnight.','Grill or pan-sear the chicken over high heat until charred in spots and cooked through, about 5 to 6 minutes per side.','Rest 5 minutes, then dice or slice.'],
+ nt:'Adapted \u2014 a standard Chipotle-style Adobo Chicken copycat. I wasn\u2019t able to confirm Dinner, then Dessert\u2019s exact published numbers, so this is a sound representative version rather than a copy of their specific recipe.'},
+{id:'copycat-chickendumplings',group:'Entrees: Copycat',style:'Cracker Barrel',name:'Chicken and Dumplings',u:['serving','servings'],b:6,c:[4,6,8],d:6,min:1,max:16,k:'n',
+ ing:[['chicken','Boneless, skinless chicken breasts',680,'g',0],['stock','Chicken broth',1400,'g',LQ],['butter','Butter',57,'g',BU],['flour','Unbleached all-purpose flour (for dumplings)',240,'g',FL],['bp','Baking powder',8,'g',BP],['salt','Salt',6,'g',SA],['milk','Milk',180,'g',LQ],['soup','Cream of chicken soup (optional, for richness)',280,'g',LQ]],
+ st:['Simmer the chicken breasts in the chicken broth until cooked through, about 20 minutes. Remove, shred or dice, and set aside.','Stir the cream of chicken soup into the broth if using.','For the dumplings, mix the flour, baking powder, and salt. Cut in the butter, then stir in the milk just until a soft dough forms.','Roll the dough thin and cut into strips, or drop by spoonfuls into the simmering broth.','Simmer 15 to 20 minutes, stirring occasionally, until the dumplings are cooked through and the broth has thickened.','Return the chicken to the pot and heat through before serving.'],
+ nt:'Adapted \u2014 a standard Cracker Barrel-style Chicken and Dumplings copycat. I wasn\u2019t able to confirm Eating on a Dime\u2019s exact published numbers, so this is a sound representative version rather than a copy of their specific recipe.'},
+{id:'copycat-chipotlesteak',group:'Entrees: Copycat',style:'Chipotle',name:'Steak',u:['serving','servings'],b:4,c:[2,4,6,8],d:4,min:1,max:16,k:'n',
+ ing:[['steak','Flank or sirloin steak',680,'g',0],['chipotle','Chipotle peppers in adobo sauce, minced',30,'g',0],['garlic','Garlic, minced',9,'g',.33],['cumin','Cumin',4,'g',1],['oregano','Dried oregano',2,'g',1],['lime','Lime juice',30,'g',LQ],['oil','Oil',30,'g',LQ],['salt','Salt',6,'g',SA],['pepper','Black pepper',2,'g',.5]],
+ st:['Blend the chipotle peppers, garlic, cumin, oregano, lime juice, oil, salt, and pepper into a marinade.','Coat the steak in the marinade. Marinate at least 30 minutes, or up to overnight.','Grill or sear the steak over high heat to your preferred doneness.','Rest 5 minutes, then dice into bite-sized pieces.'],
+ nt:'Adapted \u2014 a standard Chipotle-style Steak copycat. I wasn\u2019t able to confirm Culinary Hill\u2019s exact published numbers, so this is a sound representative version rather than a copy of their specific recipe.'}
 ];
 
 // pizza is handled specially (kind 'p'), not in the generic ingredient table
@@ -660,22 +774,19 @@ function fr(x){
   var s=(W||'')+['','⅛','¼','⅜','½','⅝','¾','⅞'][Rr];
   return s||'0';
 }
-// decompose eighths into physically-measurable spoon combo (only 1/8,1/4,1/2,1 exist as spoons)
-function spoonCombo(totalEighths,unit){
-  var W=Math.floor(totalEighths/8),rem=totalEighths%8;
-  var parts=[];
-  if(W>0) parts.push(W+' '+unit+(W>1?'s':''));
-  var pieces=[[4,'½'],[2,'¼'],[1,'⅛']];
-  pieces.forEach(function(p){while(rem>=p[0]){parts.push(p[1]+' '+unit);rem-=p[0]}});
-  return parts.join(' + ')||('0 '+unit);
-}
-function isCleanSpoon(eighths){return [0,1,2,4,8].indexOf(eighths%8===0?8:eighths%8)>-1 || eighths%8===0}
+
 function vol(t,unitless){
   if(t<0.0625) return {txt:'tiny pinch',approx:true};
-  if(t>=36){var c=t/48,ce=Math.round(c*8);return {txt:(ce%8===0||[1,2,4].indexOf(ce%8)>-1)?fr(ce/8)+(ce/8>1?' cups':' cup'):spoonCombo(ce,'cup'),approx:false}}
-  if(t>=2.5){var tb=t/3,te=Math.round(tb*8);return {txt:(te%8===0||[1,2,4].indexOf(te%8)>-1)?fr(te/8)+' tbsp':spoonCombo(te,'tbsp'),approx:false}}
+  // Cups and tablespoons round to the nearest quarter — that's how people
+  // actually measure oil, broth, sauce, etc., and it's a single clean
+  // fraction every time (fr() has a glyph for every eighth, so this never
+  // needs to fall back to a multi-spoon combo like "½ + ¼ + ⅛").
+  if(t>=36){var c=t/48,ce=Math.round(c*4)*2;return {txt:fr(ce/8)+(ce/8>1?' cups':' cup'),approx:Math.abs(ce/8-c)>0.01}}
+  if(t>=2.5){var tb=t/3,te=Math.round(tb*4)*2;return {txt:fr(te/8)+' tbsp',approx:Math.abs(te/8-tb)>0.01}}
+  // Small tsp amounts (leavening, salt, spices) keep full eighth precision,
+  // since that's where the difference actually matters.
   var e=Math.max(1,Math.round(t*8));
-  return {txt:(e%8===0||[1,2,4].indexOf(e%8)>-1)?fr(e/8)+' tsp':spoonCombo(e,'tsp'),approx:false};
+  return {txt:fr(e/8)+' tsp',approx:false};
 }
 function gm(x,u){return (x<1?x.toFixed(2):x<10?x.toFixed(1):Math.round(x))+' '+u}
 
@@ -976,6 +1087,100 @@ function ingRow(i,mult,a,r){
   return '<tr><td>'+i[1]+ch+'</td><td class="g">'+gm(amt,i[3])+'</td><td class="v">'+(approx?'<span class="approx">●</span> ':'')+vt+'</td></tr>';
 }
 
+// Resolve {ing:key} and {ing:key:frac} placeholders in instruction text to the
+// current scaled, human-readable amount for that ingredient — so steps never
+// go stale when servings change. frac (0-1) returns a portion of that amount,
+// for techniques like "add the stock a bit at a time" where the method uses a
+// fraction of one ingredient's total per addition rather than all of it at once.
+function ingText(key,mult,a,r,frac){
+  var i=r.ing.filter(function(x){return x[0]===key})[0];
+  if(!i) return '['+key+'?]';
+  var amt=i[2]*mult,v=i[4];
+  if(r.cut&&r.cut.indexOf(i[0])>-1&&a.l) amt*=1-a.l;
+  if(i[0]===r.li&&a.q) amt+=a.q*14.79*mult;
+  if(frac) amt*=frac;
+  if(v==='egg'){var e=amt/50,rr=Math.round(e*2)/2;return rr>=.5?fr(rr)+(rr>1?' eggs':' egg'):'a beaten, weighed portion of egg'}
+  if(v===0){var oz=amt/28.35;return oz>=16?fr(Math.round(oz/4)/4)+' lb':fr(Math.round(oz*2)/2)+' oz'}
+  return vol(amt*v).txt
+}
+function fillIngPlaceholders(s,mult,a,r){
+  return s.replace(/\{ing:([a-zA-Z0-9_]+)(?::([\d.]+))?\}/g,function(_,key,frac){
+    return ingText(key,mult,a,r,frac?parseFloat(frac):null)
+  });
+}
+// Pan/vessel capacity guidance: when a recipe is written around one fixed
+// vessel (a loaf pan, a 9x13 dish, a single pie crust) but the yield scales
+// past what that vessel holds, say so explicitly instead of leaving the
+// method's pan reference silently wrong.
+function panNote(r,mult){
+  if(!r.pan) return '';
+  var count=mult/r.pan.each;
+  if(count<=1.001) return '';
+  var whole=Math.round(count*4)/4;
+  var plural=r.pan.plural||(r.pan.label+'s');
+  return '<p class="note warn">This batch is about '+fr(whole)+'× what one '+r.pan.label+' holds. Divide between '+Math.ceil(count)+' '+plural+', or bake in batches.</p>';
+}
+// Source-type badge for the 134 generic recipes, matching the structured
+// "published / adapted" label the bread and chef-pizza calculators already
+// show — derived from the note text that's already written for every one of
+// them, so this is mechanical and needs no new research or guessing.
+function sourceBadge(r){
+  if(!r.nt) return '';
+  var published=/^Published recipe/i.test(r.nt);
+  return '<p class="note" style="margin:0 0 6px"><b>'+(published?'Published recipe':'Adapted / standard recipe')+'</b></p>';
+}
+// Equipment list, detected from words already in the method text (and any
+// r.pan already set) rather than hand-entered per recipe — covers what it
+// can find and simply shows nothing for a recipe where none of these match,
+// instead of guessing at equipment no one actually wrote down.
+var EQUIP_WORDS=[
+  ['wok','Wok (or a large, wide skillet)'],['dutch oven','Dutch oven'],['skillet','Large skillet'],
+  ['griddle','Griddle or flat-top'],['baking dish','Baking dish'],['loaf pan','Loaf pan'],
+  ['pie crust','Pie dish'],['food processor','Food processor'],['stand mixer','Stand mixer'],
+  ['rolling pin','Rolling pin'],['broiler','Broiler'],['grill','Grill or grill pan'],
+  ['instant-read thermometer','Instant-read thermometer'],['cast iron skillet','Cast-iron skillet']
+];
+function equipList(r){
+  var all=(r.st||[]).join(' ').toLowerCase(),found=[];
+  if(r.pan&&r.pan.label) found.push(r.pan.label);
+  EQUIP_WORDS.forEach(function(p){if(all.indexOf(p[0])>-1&&found.indexOf(p[1])===-1) found.push(p[1])});
+  return found;
+}
+// Total time, estimated by summing the durations already written into a
+// recipe's own steps — never an invented number. A duration offered as an
+// alternative ("or refrigerate 24 to 72 hours for more flavor") is excluded
+// from the sum and surfaced as a separate note instead, so an optional
+// overnight option doesn't make the quick version of a recipe look like an
+// all-day project. Anything past 6 hours in one mention is treated the same
+// way — it's almost always an optional extended rest, not a mandatory wait.
+function parseTotalTime(r){
+  var text=(r.st||[]).join(' \u2026 ');
+  var re=/(\d+)\s*(?:to|-)\s*(\d+)\s*(hours?|hrs?|minutes?|mins?)|\babout\s+(\d+)\s*(hours?|hrs?|minutes?|mins?)|\b(\d+)\s*(hours?|hrs?|minutes?|mins?)\b/gi;
+  var total=0,found=false,hasOptionalLong=/overnight|up to \d+\s*days?/i.test(text),m;
+  while((m=re.exec(text))){
+    var before=text.substring(Math.max(0,m.index-100),m.index).toLowerCase();
+    // Skip anything flagged as an alternative rather than a required step —
+    // "or refrigerate 24 to 72 hours", "for a deeper flavor, simmer 2 hours
+    // more", "alternatively...", etc. — so an optional longer technique
+    // doesn't get added on top of the quick version of the same step.
+    if(/\bor\b[\s\w]*$/.test(before)||/\b(for (a )?(deeper|better|more|extra) flavor|alternatively|if you have time|for even|for the best)\b/.test(before)) continue;
+    var mins,unit;
+    if(m[1]&&m[2]){mins=(parseInt(m[1],10)+parseInt(m[2],10))/2;unit=m[3]}
+    else if(m[4]){mins=parseInt(m[4],10);unit=m[5]}
+    else if(m[6]){mins=parseInt(m[6],10);unit=m[7]}
+    else continue;
+    if(/h/i.test(unit)) mins*=60;
+    if(mins>360){hasOptionalLong=true;continue} // treat a lone 6+ hour mention as optional, not additive
+    total+=mins;found=true;
+  }
+  if(!found) return null;
+  return {minutes:Math.round(total),hasOptionalLong:hasOptionalLong};
+}
+function fmtTime(mins){
+  if(mins<60) return mins+' min';
+  var h=Math.floor(mins/60),m=Math.round(mins%60);
+  return h+'h'+(m?' '+m+'m':'');
+}
 function renderGeneric(){
   var r=cur;
   var res=parseQty($('count').value,r.min,r.max);
@@ -1015,11 +1220,16 @@ function renderGeneric(){
     var totalDough=r.ing.reduce(function(s,i){return s+(i[3]==='g'||i[3]==='ml'?i[2]*mult:0)},0);
     ballWt=Math.round(totalDough/n);
   }
-  var steps=r.st.map(function(s){return '<li>'+s.replace(/\{T\}/g,temp).replace(/\{M\}/g,time).replace(/\{P\}/g,pans).replace(/\{N\}/g,n).replace(/\{S\}/g,n>1?'s':'').replace(/\{BALL\}/g,ballWt)+'</li>'}).join('');
+  var steps=r.st.map(function(s){return '<li>'+fillIngPlaceholders(s.replace(/\{T\}/g,temp).replace(/\{M\}/g,time).replace(/\{P\}/g,pans).replace(/\{N\}/g,n).replace(/\{S\}/g,n>1?'s':'').replace(/\{BALL\}/g,ballWt),mult,a,r)+'</li>'}).join('');
+  var equip=equipList(r);
+  var equipHtml=equip.length?'<section class="card"><h2>Equipment</h2><p class="note" style="margin:0">'+equip.join(' · ')+'</p></section>':'';
+  var tt=parseTotalTime(r);
+  var ttHtml=tt?'<p class="note" style="margin:0 0 6px">⏱ About '+fmtTime(tt.minutes)+(tt.hasOptionalLong?', plus an optional longer rest \u2014 see method':'')+' <span style="color:var(--muted)">(estimated by adding up the times below)</span></p>':'';
   out.innerHTML=
    '<section class="card"><h2>Ingredients for '+n+' '+un+'</h2><table>'+rows+'</table>'+tips+'</section>'+
    '<section class="card"><h2>Elevation: '+ft.toLocaleString()+' ft</h2>'+eh+'</section>'+
-   '<section class="card"><h2>Method</h2><ol>'+steps+'</ol>'+(r.nt?'<p class="note">'+r.nt+'</p>':'')+(r.url?'<p class="note"><a href="'+r.url+'" target="_blank" rel="noopener">Source</a></p>':'')+'</section>';
+   equipHtml+
+   '<section class="card"><h2>Method</h2>'+ttHtml+sourceBadge(r)+panNote(r,mult)+'<ol>'+steps+'</ol>'+(r.nt?'<p class="note">'+r.nt+'</p>':'')+(r.url?'<p class="note"><a href="'+r.url+'" target="_blank" rel="noopener">Source</a></p>':'')+'</section>';
 }
 
 var curPStyle='ny',curPSizeIdx=2;
@@ -1192,26 +1402,81 @@ function pick(id){
 
 // ==== navigation shell (home / category / recipe) ====
 var CATS=[
- {key:'biscuits',label:'Biscuits & Quick Breads',groups:['Biscuits','Quick breads'],icon:'biscuit'},
- {key:'bread',label:'Bread',special:'bread',icon:'bread'},
- {key:'glutenfree',label:'Gluten-Free',groups:['Gluten-Free'],icon:'gf'},
- {key:'dough',label:'Pizza & Pie Dough',special:'dough',icon:'pizza'},
- {key:'chefpizza',label:'Copy Cat Recipes',special:'chefpizza',icon:'chefhat'},
- {key:'tortillas',label:'Tortillas, Noodles & Pasta',groups:['Tortillas and noodles'],icon:'noodles'},
- {key:'cookies',label:'Cookies',groups:['Cookies'],icon:'cookie'},
- {key:'pies',label:'Pies',groups:['Pies'],icon:'pie'},
+ {key:'biscuitsbreads',label:'Biscuits and Breads',special:'section',sectionKey:'biscuitsbreads',icon:'biscuit'},
+ {key:'pizza',label:'Pizza',special:'section',sectionKey:'pizza',icon:'pizza'},
+ {key:'pasta',label:'Pasta',special:'section',sectionKey:'pasta',icon:'noodles'},
+ {key:'spanish',label:'Spanish',special:'section',sectionKey:'spanish',icon:'noodles'},
+ {key:'sweets',label:'Sweets',special:'section',sectionKey:'sweets',icon:'cookie'},
  {key:'sauces',label:'Sauces & Gravy',groups:['Sauces & Gravy'],icon:'pan'},
- {key:'entrees',label:'Entrees',special:'entrees',icon:'entree'}
+ {key:'entrees',label:'Entrees',special:'section',sectionKey:'entrees',icon:'entree'},
+ {key:'glutenfree',label:'Gluten-Free',groups:['Gluten-Free'],icon:'gf',kind:'filter'}
 ];
-// Entrees: dishes live in the main R array (same engine as everything else),
-// tagged with a per-cuisine group string. Adding a cuisine later is just a new
-// CUISINES entry + dishes in R with that group — nothing else changes.
-var CUISINES=[
- {key:'chinese-japanese',label:'Chinese & Japanese',group:'Entrees: Chinese & Japanese'},
- {key:'american',label:'American',group:'Entrees: American'},
- {key:'italian',label:'Italian',group:'Entrees: Italian'},
- {key:'mexican',label:'Mexican',group:'Entrees: Mexican'}
-];
+// A generic row-builder used by every tab below, so each one only has to say
+// which recipes it wants — it doesn't need to re-derive the "Published /
+// Standard ratio" subtitle line itself.
+function rrow(r){var showedName=r.name&&r.name!=='Classic';var status=r.v?'Published':'Standard ratio';
+  return {id:r.id,label:recipeLabel(r),sub:showedName?(r.style+' · '+status):status}}
+function breadrow(b){return {id:'bread:'+b.id,label:b.name+(b.adapted?' (adapted)':''),sub:b.source.replace(/\s*\([^)]*\)\s*$/,'')}}
+// Sections replace the old flat category list for anything with real
+// subcategories: each has a label and a list of tabs, and each tab is a
+// function returning the rows for it — built from whatever underlying data
+// it needs (R-array recipes, BREADS, CHEFPIZZA, synthetic entries), which is
+// what lets one tab mix recipe types that use completely different
+// calculators under the hood (e.g. Breads mixes the baker's-percentage BREADS
+// array with the plain-ratio Cornbread recipe).
+var SECTIONS={
+ biscuitsbreads:{label:'Biscuits and Breads',tabs:[
+  {key:'biscuits',label:'Biscuits',items:function(){return R.filter(function(r){return r.group==='Biscuits'}).map(rrow)}},
+  {key:'breads',label:'Breads',items:function(){
+    var out=BREADS.map(breadrow);
+    R.filter(function(r){return r.id==='corn'}).forEach(function(r){out.push(rrow(r))});
+    return out;
+  }},
+  {key:'muffinsbagels',label:'Muffins and Bagels',items:function(){
+    var out=[];
+    R.filter(function(r){return r.id==='muffin-blueberry-ka'}).forEach(function(r){out.push(rrow(r))});
+    BREADS.filter(function(b){return ['bagels-reinhart','tpl-ww-pita'].indexOf(b.id)>-1}).forEach(function(b){out.push(breadrow(b))});
+    return out;
+  }},
+  {key:'pancakeswaffles',label:'Pancakes and Waffles',items:function(){
+    return R.filter(function(r){return ['pan','pan-regular','waffle-buttermilk-ka','waffle-belgian-ka'].indexOf(r.id)>-1}).map(rrow);
+  }}
+ ]},
+ pizza:{label:'Pizza',tabs:[
+  {key:'dough',label:'Dough',items:function(){
+    var out=[{id:'pizza',label:'Pizza Dough — New York, Neapolitan, or Detroit',sub:'Pick a style and size'}];
+    CHEFPIZZA.forEach(function(c){out.push({id:'cp:'+c.id,label:c.chef+(c.adapted?' (adapted)':''),sub:c.size+' pizza dough'})});
+    return out;
+  }},
+  {key:'sauce',label:'Sauce',items:function(){return R.filter(function(r){return r.style==='No-Cook Pizza Sauce'}).map(rrow)}}
+ ]},
+ pasta:{label:'Pasta',tabs:['Penne','Fettuccine','Angel Hair','Spaghetti','Lasagna'].map(function(shape){
+  return {key:shape.toLowerCase().replace(/\s+/g,'-'),label:shape,items:function(){
+    return R.filter(function(r){return ['pasta','nood'].indexOf(r.id)>-1}).map(function(r){
+      var row=rrow(r);row.sub='Base dough — cut/shape for '+shape;return row;
+    });
+  }};
+ })},
+ spanish:{label:'Spanish',tabs:[
+  {key:'tortillas',label:'Tortillas, Flour and Corn',items:function(){return R.filter(function(r){return ['ftor','ctor'].indexOf(r.id)>-1}).map(rrow)}},
+  {key:'empanadas',label:'Empanadas',items:function(){
+    return R.filter(function(r){return r.id==='entree-empanadas'}).map(function(r){var row=rrow(r);row.sub='Also under Entrees → Mexican';return row});
+  }}
+ ]},
+ sweets:{label:'Sweets',tabs:[
+  {key:'piecrustfillings',label:'Pie Crust & Fillings',items:function(){return R.filter(function(r){return r.id==='pie'||r.group==='Pies'}).map(rrow)}},
+  {key:'churros',label:'Churros',items:function(){return []}},
+  {key:'cookies',label:'Cookies',items:function(){return R.filter(function(r){return r.group==='Cookies'}).map(rrow)}}
+ ]},
+ entrees:{label:'Entrees',tabs:[
+  {key:'chinese',label:'Chinese',items:function(){return R.filter(function(r){return r.group==='Entrees: Chinese'}).map(rrow)}},
+  {key:'japanese',label:'Japanese',items:function(){return R.filter(function(r){return r.group==='Entrees: Japanese'}).map(rrow)}},
+  {key:'american',label:'American',items:function(){return R.filter(function(r){return r.group==='Entrees: American'}).map(rrow)}},
+  {key:'italian',label:'Italian',items:function(){return R.filter(function(r){return r.group==='Entrees: Italian'}).map(rrow)}},
+  {key:'mexican',label:'Mexican',items:function(){return R.filter(function(r){return r.group==='Entrees: Mexican'}).map(rrow)}},
+  {key:'copycat',label:'Copycat',items:function(){return R.filter(function(r){return r.group==='Entrees: Copycat'}).map(rrow)}}
+ ]}
+};
 var ICONS={
  biscuit:'<circle cx="12" cy="13" r="7"/><path d="M9 6.5c0-1.5 1.2-3 3-3s3 1.5 3 3"/><circle cx="9.5" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="14.5" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="12" cy="15.5" r=".7" fill="currentColor" stroke="none"/>',
  bread:'<path d="M4 12c0-4 3-7 8-7s8 3 8 7v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z"/><path d="M9 7.5l1.3 5M13.3 7l1.3 5.5"/>',
@@ -1229,28 +1494,26 @@ function iconSvg(key,size){
   size=size||20;
   return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[key]||'')+'</svg>';
 }
-function recipeLabel(x){return x.style+(x.name&&x.name!=='Classic'?' — '+x.name:'')}
+// For entree dishes, "style" is a protein/dish-type grouping (Beef, Chicken,
+// Pasta...) and "name" is the actual dish — lead with the dish name there
+// ("Mongolian Beef" instead of "Beef — Mongolian Beef"), since that's what
+// someone scanning a list of dishes is looking for. Every other category
+// keeps the existing style-first order, where style IS the distinguishing
+// identity (e.g. "Southern Buttermilk — Classic" biscuits).
+function recipeLabel(x){
+  if(x.group&&x.group.indexOf('Entrees:')===0&&x.name&&x.name!=='Classic') return x.name;
+  return x.style+(x.name&&x.name!=='Classic'?' — '+x.name:'')
+}
 function itemsForCat(cat){
   if(cat.groups){
     return R.filter(function(r){return cat.groups.indexOf(r.group)>-1}).map(function(r){
       return {id:r.id,label:recipeLabel(r),sub:r.v?'Cross-checked, published':'Standard ratio, not cross-checked'};
     });
   }
-  if(cat.special==='bread'){
-    return BREADS.map(function(b){return {id:'bread:'+b.id,label:b.name+(b.adapted?' (adapted)':''),sub:b.source.replace(/\s*\([^)]*\)\s*$/,'')};});
-  }
-  if(cat.special==='chefpizza'){
-    return CHEFPIZZA.map(function(c){return {id:'cp:'+c.id,label:c.chef+(c.adapted?' (adapted)':''),sub:c.size+' pizza dough'};});
-  }
-  if(cat.special==='dough'){
-    var items=[{id:'pizza',label:'Pizza Dough — New York, Neapolitan, or Detroit',sub:'Pick a style and size'}];
-    R.filter(function(r){return r.group==='Dough'}).forEach(function(r){items.push({id:r.id,label:r.style,sub:'Crust, scales by count'});});
-    return items;
-  }
-  if(cat.special==='entrees'){
+  if(cat.special==='section'){
     var out=[];
-    CUISINES.forEach(function(cz){
-      R.filter(function(r){return r.group===cz.group}).forEach(function(r){out.push({id:r.id,label:recipeLabel(r),sub:cz.label})});
+    SECTIONS[cat.sectionKey].tabs.forEach(function(tab){
+      tab.items().forEach(function(it){out.push(it)});
     });
     return out;
   }
@@ -1276,80 +1539,302 @@ function makeRow(opts){
   b.addEventListener('click',opts.onClick);
   return b;
 }
-var screenBeforeShopping='home';
 function showScreen(name){
   $('screenHome').style.display=name==='home'?'block':'none';
   $('screenCategory').style.display=name==='category'?'block':'none';
   $('screenRecipe').style.display=name==='recipe'?'block':'none';
   $('screenShopping').style.display=name==='shopping'?'block':'none';
-  window.scrollTo(0,0);
+  $('screenSaved').style.display=name==='saved'?'block':'none';
+  ['navHome','navSaved','navShopping'].forEach(function(id){$(id).removeAttribute('aria-current')});
+  if(name==='home'||name==='category'||name==='recipe') $('navHome').setAttribute('aria-current','true');
+  else if(name==='saved') $('navSaved').setAttribute('aria-current','true');
+  else if(name==='shopping') $('navShopping').setAttribute('aria-current','true');
 }
+// ---- favorites / saved recipes ----
+function loadFavorites(){try{return JSON.parse(localStorage.getItem('bk_favorites')||'[]')}catch(e){return []}}
+function saveFavorites(list){try{localStorage.setItem('bk_favorites',JSON.stringify(list))}catch(e){}}
+function isFavorited(id){return loadFavorites().indexOf(id)>-1}
+function toggleFavorite(id){
+  var list=loadFavorites(),idx=list.indexOf(id);
+  if(idx>-1) list.splice(idx,1); else list.push(id);
+  saveFavorites(list);
+  return idx===-1;
+}
+function renderSaved(){
+  var ids=loadFavorites();
+  var box=$('savedList');box.innerHTML='';
+  var valid=ids.map(findItemById).filter(Boolean);
+  $('savedEmpty').style.display=valid.length?'none':'block';
+  valid.forEach(function(item){
+    box.appendChild(makeRow({title:item.label,sub:item.catLabel,onClick:function(){openRecipe(item)}}));
+  });
+}
+// ---- hash router: makes the browser/gesture back button and direct links
+// to a recipe actually work, and restores scroll position on the way back.
+// Every real forward navigation (opening a category, a recipe, or the
+// shopping list) changes location.hash, which is what pushes a browser
+// history entry; every "back" button in the app just calls history.back(),
+// so it's indistinguishable from the OS back gesture. Switching cuisine tabs
+// within Entrees uses history.replaceState instead, so swiping through five
+// tabs doesn't force five back-presses to escape — only entering Entrees in
+// the first place is a real history step.
+var SCROLL_POS={};
+function findItemById(id){
+  var it=allSearchItems().filter(function(x){return x.id===id})[0];
+  if(it) return it;
+  if(id.indexOf('bread:')===0){var b=BREADS.filter(function(x){return x.id===id.slice(6)})[0];if(b)return{id:id,label:b.name+(b.adapted?' (adapted)':'')}}
+  if(id.indexOf('cp:')===0){var c=CHEFPIZZA.filter(function(x){return x.id===id.slice(3)})[0];if(c)return{id:id,label:c.chef+(c.adapted?' (adapted)':'')}}
+  if(id==='pizza') return {id:id,label:'Pizza Dough — New York, Neapolitan, or Detroit'};
+  return null;
+}
+function hashFor(route){
+  if(route.screen==='cat') return '#/cat/'+route.cat;
+  if(route.screen==='section') return '#/sec/'+route.section+'/'+route.tab;
+  if(route.screen==='recipe') return '#/recipe/'+encodeURIComponent(route.id);
+  if(route.screen==='shopping') return '#/shopping';
+  if(route.screen==='saved') return '#/saved';
+  return '#/';
+}
+function parseHash(){
+  var h=location.hash.replace(/^#\/?/,'');
+  var parts=h.split('/').filter(Boolean);
+  if(!parts.length) return {screen:'home'};
+  if(parts[0]==='sec') return {screen:'section',section:parts[1],tab:parts[2]};
+  if(parts[0]==='cat') return {screen:'cat',cat:parts[1]};
+  if(parts[0]==='recipe') return {screen:'recipe',id:decodeURIComponent(parts[1]||'')};
+  if(parts[0]==='shopping') return {screen:'shopping'};
+  if(parts[0]==='saved') return {screen:'saved'};
+  return {screen:'home'};
+}
+function navigate(route,opts){
+  var h=hashFor(route);
+  opts=opts||{};
+  if(opts.replace){try{history.replaceState(null,'',h)}catch(e){} applyRoute(route)}
+  else if(location.hash===h){applyRoute(route)}
+  else{location.hash=h}
+}
+function applyRoute(route){
+  if(route.screen==='cat'){
+    var cat=CATS.filter(function(c){return c.key===route.cat})[0];
+    if(!cat){applyRoute({screen:'home'});return}
+    curCat=cat;
+    $('cuisineTabs').style.display='none';
+    $('catTitle').textContent=cat.label.toUpperCase();
+    var list=$('catItemList');list.innerHTML='';
+    itemsForCat(cat).forEach(function(item){
+      list.appendChild(makeRow({title:item.label,sub:item.sub,onClick:function(){navigate({screen:'recipe',id:item.id})}}));
+    });
+    showScreen('category');
+  }else if(route.screen==='section'){
+    var section=SECTIONS[route.section];
+    if(!section){applyRoute({screen:'home'});return}
+    var idx=section.tabs.map(function(t){return t.key}).indexOf(route.tab);
+    curSectionKey=route.section;
+    curTabIdx=idx>-1?idx:0;
+    renderSectionCategory(route.section);
+    showScreen('category');
+  }else if(route.screen==='recipe'){
+    var item=findItemById(route.id);
+    pick(route.id);
+    $('recipeTitle').textContent=item?item.label:route.id;
+    if(item) saveRecent(item);
+    $('favBtn').setAttribute('aria-pressed',isFavorited(route.id)?'true':'false');
+    showScreen('recipe');
+  }else if(route.screen==='shopping'){
+    renderShopping();
+    showScreen('shopping');
+  }else if(route.screen==='saved'){
+    renderSaved();
+    showScreen('saved');
+  }else{
+    renderHome();
+    showScreen('home');
+  }
+  window.scrollTo(0,SCROLL_POS[location.hash]||0);
+}
+window.addEventListener('hashchange',function(e){
+  var oldHash=e.oldURL.indexOf('#')>-1?e.oldURL.slice(e.oldURL.indexOf('#')):'#/';
+  SCROLL_POS[oldHash]=window.scrollY;
+  applyRoute(parseHash());
+});
 
 // ---- shopping list ----
-function loadShopList(){var list={};try{list=JSON.parse(localStorage.getItem('bk_shopping')||'{}')}catch(e){list={}}return list}
-function saveShopList(list){try{localStorage.setItem('bk_shopping',JSON.stringify(list))}catch(e){}}
-function shopCount(){var list=loadShopList();return Object.keys(list).length}
+// ---- shopping list: normalization, categorization, per-recipe storage ----
+// Recipe ingredient names are free text ("Garlic, minced", "Garlic cloves,
+// peeled", "Unsalted butter", "Butter, softened"...) so merging on the exact
+// string, like the old list did, fragments the same pantry item into three
+// or four separate lines. This strips prep notes and collapses common
+// synonyms down to one canonical bucket to merge on instead.
+var ING_SYNONYMS={
+  'kosher salt':'salt','sea salt':'salt','fine sea salt':'salt','table salt':'salt','cooking salt':'salt',
+  'black pepper':'pepper','ground black pepper':'pepper','white pepper':'white pepper',
+  'extra light olive oil':'olive oil','extra virgin olive oil':'olive oil',
+  'unsalted butter':'butter','salted butter':'butter',
+  'yellow onion':'onion','white onion':'onion','red onion':'onion','sweet onion':'onion','large onion':'onion',
+  'garlic cloves':'garlic','garlic clove':'garlic',
+  'unbleached all-purpose flour':'all-purpose flour','all purpose flour':'all-purpose flour','ap flour':'all-purpose flour',
+  'large eggs':'eggs','large egg':'eggs',
+  'granulated sugar':'sugar','white sugar':'sugar',
+  'light brown sugar':'brown sugar','dark brown sugar':'brown sugar',
+  'vegetable oil':'neutral oil','canola oil':'neutral oil','neutral oil':'neutral oil',
+  'whole milk':'milk','2% milk':'milk',
+  'unbleached all-purpose flour (for dredging)':'all-purpose flour'
+};
+function canonicalIngName(name){
+  var s=name.replace(/\(.*?\)/g,'');      // drop parenthetical asides
+  s=s.split(',')[0];                       // drop everything after the first comma — that's almost always prep ("minced","softened","divided"...)
+  s=s.trim().toLowerCase();
+  s=s.replace(/^(a few |about )/,'');
+  s=s.replace(/^(large|small|medium|extra|fresh|dried|ground|whole|chopped|minced|sliced|diced|grated|shredded|finely|coarsely)\s+/,'');
+  if(ING_SYNONYMS[s]) s=ING_SYNONYMS[s];
+  return s;
+}
+function titleCase(s){return s.replace(/\b\w/g,function(c){return c.toUpperCase()})}
+var GROCERY_SECTIONS=[
+  {name:'Produce',words:['onion','garlic','pepper bell','bell pepper','tomato','lemon','lime','orange','celery','carrot','mushroom','potato','cilantro','parsley','basil','ginger','scallion','green onion','lettuce','cabbage','broccoli','jalape','avocado','apple','banana','herb']},
+  {name:'Meat & Seafood',words:['beef','chicken','pork','steak','bacon','sausage','ribeye','lobster','shrimp','guanciale','pancetta','ham','turkey']},
+  {name:'Dairy & Eggs',words:['butter','milk','cream','cheese','parmesan','mozzarella','cheddar','yogurt','eggs','egg','sour cream','buttermilk']},
+  {name:'Pantry',words:['flour','sugar','oil','vinegar','rice','pasta','noodle','tortilla','bread','panko','breadcrumb','broth','stock','sauce','ketchup','mayonnaise','mustard','soy sauce','honey','syrup','cornstarch','yeast','baking powder','baking soda','tomato paste','canned','beans','wine','vanilla']},
+  {name:'Spices & Seasonings',words:['salt','pepper','paprika','cumin','oregano','cinnamon','nutmeg','chili','cayenne','seasoning','spice','thyme','rosemary','bay leaf','garlic powder','onion powder']}
+];
+function grocerySection(canonical){
+  for(var i=0;i<GROCERY_SECTIONS.length;i++){
+    var sec=GROCERY_SECTIONS[i];
+    for(var j=0;j<sec.words.length;j++) if(canonical.indexOf(sec.words[j])>-1) return sec.name;
+  }
+  return 'Other';
+}
+function loadShopData(){
+  var d={entries:{},dismissed:[]};
+  try{var raw=JSON.parse(localStorage.getItem('bk_shopping_v2')||'null');if(raw&&raw.entries)d=raw}catch(e){}
+  return d;
+}
+function saveShopData(d){try{localStorage.setItem('bk_shopping_v2',JSON.stringify(d))}catch(e){}}
+// Build the merged, de-duplicated ingredient view from every recipe entry
+// currently in the list. Re-running this from scratch each time (rather
+// than keeping a running total) is what makes re-adding a recipe safe —
+// tapping "Add to Shopping List" twice for the same dish replaces that
+// recipe's contribution instead of doubling it.
+function mergedShopView(){
+  var d=loadShopData(),buckets={};
+  Object.keys(d.entries).forEach(function(label){
+    var entry=d.entries[label];
+    entry.ingredients.forEach(function(ing){
+      var canon=canonicalIngName(ing.name);
+      var key=canon+'|'+ing.unit;
+      if(d.dismissed.indexOf(key)>-1) return;
+      if(!buckets[key]) buckets[key]={canon:canon,unit:ing.unit,amount:0,display:titleCase(canon),sources:[]};
+      buckets[key].amount+=ing.amount;
+      var tag=entry.label+(entry.qty?' ('+entry.qty+')':'');
+      if(buckets[key].sources.indexOf(tag)===-1) buckets[key].sources.push(tag);
+    });
+  });
+  return buckets;
+}
+function shopCount(){return Object.keys(mergedShopView()).length}
 function updateCartDots(){
   var n=shopCount();
-  ['cartDotHome','cartDotCat','cartDotRecipe'].forEach(function(id){
+  ['cartDotHome','cartDotCat','cartDotRecipe','navShopBadge'].forEach(function(id){
     var el=$(id);if(!el)return;
     if(n>0){el.textContent=n>99?'99+':String(n);el.style.display='flex'}else{el.style.display='none'}
   });
 }
 function addCurrentToShoppingList(){
   if(!CURRENT_ING.length) return;
-  var list=loadShopList();
-  CURRENT_ING.forEach(function(ing){
-    var key=ing.name+'|'+ing.unit;
-    if(!list[key]) list[key]={name:ing.name,unit:ing.unit,amount:0,sources:[]};
-    list[key].amount+=ing.amount;
-    var tag=CURRENT_LABEL+(CURRENT_QTY?' ('+CURRENT_QTY+')':'');
-    if(list[key].sources.indexOf(tag)===-1) list[key].sources.push(tag);
-  });
-  saveShopList(list);
+  var d=loadShopData();
+  var wasAlready=!!d.entries[CURRENT_LABEL];
+  // Keyed by recipe label and replaced wholesale on every add — tapping
+  // "Add to Shopping List" again for the same dish (even after changing the
+  // serving count) updates that one recipe's contribution instead of
+  // stacking a second copy of it on top of the first.
+  d.entries[CURRENT_LABEL]={label:CURRENT_LABEL,qty:CURRENT_QTY,ingredients:CURRENT_ING.slice(),addedAt:Date.now()};
+  saveShopData(d);
   updateCartDots();
   var flash=$('addToListFlash');
-  flash.textContent='Added '+CURRENT_LABEL+' to your shopping list.';
+  flash.textContent=wasAlready?('Updated '+CURRENT_LABEL+' in your shopping list.'):('Added '+CURRENT_LABEL+' to your shopping list.');
   flash.style.display='block';
   clearTimeout(window._flashTimer);
   window._flashTimer=setTimeout(function(){flash.style.display='none'},2500);
 }
 function renderShopping(){
-  var list=loadShopList();
-  var keys=Object.keys(list).sort(function(a,b){return list[a].name.localeCompare(list[b].name)});
+  var d=loadShopData();
+  var entryLabels=Object.keys(d.entries);
+  var buckets=mergedShopView();
+  var keys=Object.keys(buckets).sort(function(a,b){return buckets[a].display.localeCompare(buckets[b].display)});
+  var recipesBox=$('shopRecipes');
+  recipesBox.innerHTML='';
+  if(entryLabels.length){
+    recipesBox.style.display='block';
+    var hdr=document.createElement('div');hdr.className='shopsectionhdr';hdr.textContent='Recipes in this list';
+    recipesBox.appendChild(hdr);
+    entryLabels.sort().forEach(function(label){
+      var entry=d.entries[label];
+      var row=document.createElement('div');row.className='shoprecipe';
+      row.innerHTML='<span>'+entry.label+(entry.qty?' ('+entry.qty+')':'')+'</span><button type="button" class="shopdel" aria-label="Remove recipe">×</button>';
+      row.querySelector('.shopdel').addEventListener('click',function(){
+        var dd=loadShopData();delete dd.entries[label];saveShopData(dd);renderShopping();updateCartDots();
+      });
+      recipesBox.appendChild(row);
+    });
+  }else{
+    recipesBox.style.display='none';
+  }
   var box=$('shopList');box.innerHTML='';
   $('shopEmpty').style.display=keys.length?'none':'block';
-  $('clearListBtn').style.display=keys.length?'block':'none';
-  keys.forEach(function(key){
-    var item=list[key];
-    var row=document.createElement('div');row.className='shoprow';
-    row.innerHTML='<div class="shopmain"><div class="shopname">'+item.name+'</div>'+
-      '<div class="shopamt">'+gm(item.amount,item.unit)+'</div>'+
-      '<div class="shopsrc">'+item.sources.join(' · ')+'</div></div>'+
-      '<button type="button" class="shopdel" aria-label="Remove">×</button>';
-    row.querySelector('.shopdel').addEventListener('click',function(){
-      var l=loadShopList();delete l[key];saveShopList(l);renderShopping();updateCartDots();
+  $('clearListBtn').style.display=(keys.length||entryLabels.length)?'block':'none';
+  var bySection={};
+  keys.forEach(function(key){bySection[grocerySection(buckets[key].canon)]=bySection[grocerySection(buckets[key].canon)]||[];bySection[grocerySection(buckets[key].canon)].push(key)});
+  var order=['Produce','Meat & Seafood','Dairy & Eggs','Pantry','Spices & Seasonings','Other'];
+  order.forEach(function(secName){
+    var secKeys=bySection[secName];
+    if(!secKeys||!secKeys.length) return;
+    var hdr=document.createElement('div');hdr.className='shopsectionhdr';hdr.textContent=secName;
+    box.appendChild(hdr);
+    secKeys.forEach(function(key){
+      var item=buckets[key];
+      var row=document.createElement('div');row.className='shoprow';
+      row.innerHTML='<div class="shopmain"><div class="shopname">'+item.display+'</div>'+
+        '<div class="shopamt">'+gm(item.amount,item.unit)+'</div>'+
+        '<div class="shopsrc">'+item.sources.join(' · ')+'</div></div>'+
+        '<button type="button" class="shopdel" aria-label="Remove">×</button>';
+      row.querySelector('.shopdel').addEventListener('click',function(){
+        var dd=loadShopData();if(dd.dismissed.indexOf(key)===-1)dd.dismissed.push(key);saveShopData(dd);renderShopping();updateCartDots();
+      });
+      box.appendChild(row);
     });
-    box.appendChild(row);
   });
 }
-function openShopping(from){
-  screenBeforeShopping=from;
-  renderShopping();
-  showScreen('shopping');
-}
+function openShopping(){navigate({screen:'shopping'})}
 ['cartBtnHome','cartBtnCat','cartBtnRecipe'].forEach(function(id){
-  var from=id==='cartBtnHome'?'home':id==='cartBtnCat'?'category':'recipe';
-  $(id).addEventListener('click',function(){openShopping(from)});
+  $(id).addEventListener('click',function(){openShopping()});
 });
-$('shopBack').addEventListener('click',function(){
-  if(screenBeforeShopping==='category') showScreen('category');
-  else if(screenBeforeShopping==='recipe') showScreen('recipe');
-  else{renderHome();showScreen('home')}
-});
+$('shopBack').addEventListener('click',function(){history.back()});
 $('clearListBtn').addEventListener('click',function(){
-  saveShopList({});renderShopping();updateCartDots();
+  saveShopData({entries:{},dismissed:[]});renderShopping();updateCartDots();
 });
+$('favBtn').addEventListener('click',function(){
+  var id=$('rs').value;
+  if(!id) return;
+  var nowSaved=toggleFavorite(id);
+  $('favBtn').setAttribute('aria-pressed',nowSaved?'true':'false');
+});
+function updateThemeIcon(){
+  var dark=document.documentElement.getAttribute('data-theme')==='dark';
+  // Sun glyph for light mode (tap to go dark), moon for dark mode (tap to go light)
+  $('themeIcon').innerHTML=dark
+    ?'<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>'
+    :'<circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.3M12 19.2v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.4 19.6l1.6-1.6M18 6l1.6-1.6"/>';
+}
+$('themeToggle').addEventListener('click',function(){
+  var dark=document.documentElement.getAttribute('data-theme')==='dark';
+  if(dark){document.documentElement.removeAttribute('data-theme');try{localStorage.setItem('bk_theme','light')}catch(e){}}
+  else{document.documentElement.setAttribute('data-theme','dark');try{localStorage.setItem('bk_theme','dark')}catch(e){}}
+  updateThemeIcon();
+});
+updateThemeIcon();
+$('navHome').addEventListener('click',function(){navigate({screen:'home'})});
+$('navSaved').addEventListener('click',function(){navigate({screen:'saved'})});
+$('navShopping').addEventListener('click',function(){navigate({screen:'shopping'})});
 $('addToListBtn').addEventListener('click',addCurrentToShoppingList);
 function saveRecent(item){
   try{
@@ -1359,64 +1844,50 @@ function saveRecent(item){
     localStorage.setItem('bk_recents',JSON.stringify(recents.slice(0,5)));
   }catch(e){}
 }
-var recipeBackGoesTo='home';
-function openRecipe(item){
-  pick(item.id);
-  $('recipeTitle').textContent=item.label;
-  saveRecent(item);
-  showScreen('recipe');
-}
-var curCat=null,curCuisineIdx=0;
+function openRecipe(item){navigate({screen:'recipe',id:item.id})}
+var curCat=null,curSectionKey=null,curTabIdx=0;
 function openCategory(cat){
-  curCat=cat;
-  if(cat.special==='entrees'){
-    curCuisineIdx=0;
-    renderEntreesCategory();
-    showScreen('category');
-    return;
-  }
-  $('cuisineTabs').style.display='none';
-  $('catTitle').textContent=cat.label.toUpperCase();
-  var list=$('catItemList');list.innerHTML='';
-  itemsForCat(cat).forEach(function(item){
-    list.appendChild(makeRow({title:item.label,sub:item.sub,onClick:function(){recipeBackGoesTo='category';openRecipe(item)}}));
-  });
-  showScreen('category');
+  if(cat.special==='section'){navigate({screen:'section',section:cat.sectionKey,tab:SECTIONS[cat.sectionKey].tabs[0].key});return}
+  navigate({screen:'cat',cat:cat.key});
 }
-function renderEntreesCategory(){
-  $('catTitle').textContent='ENTREES';
+// Generic renderer for any section (Biscuits and Breads, Pizza, Pasta,
+// Spanish, Sweets, Entrees) — each just supplies its own tabs and the rows
+// for each one; this part (tab strip, swipe gesture, empty state) is shared.
+function renderSectionCategory(sectionKey){
+  curCat=CATS.filter(function(c){return c.sectionKey===sectionKey})[0];
+  var section=SECTIONS[sectionKey];
+  $('catTitle').textContent=section.label.toUpperCase();
   var tabs=$('cuisineTabs');
   tabs.style.display='flex';
   tabs.innerHTML='';
-  CUISINES.forEach(function(cz,i){
-    var b=document.createElement('button');b.type='button';b.className='cuisinetab';b.textContent=cz.label;
-    if(i===curCuisineIdx) b.setAttribute('aria-current','true');
-    b.addEventListener('click',function(){curCuisineIdx=i;renderEntreesCategory()});
+  section.tabs.forEach(function(tab,i){
+    var b=document.createElement('button');b.type='button';b.className='cuisinetab';b.textContent=tab.label;
+    if(i===curTabIdx) b.setAttribute('aria-current','true');
+    b.addEventListener('click',function(){navigate({screen:'section',section:sectionKey,tab:tab.key},{replace:true})});
     tabs.appendChild(b);
   });
   var list=$('catItemList');list.innerHTML='';
-  var cz=CUISINES[curCuisineIdx];
-  var dishes=R.filter(function(r){return r.group===cz.group});
-  if(CUISINES.length>1){
-    var hint=document.createElement('div');hint.className='swipehint';hint.textContent='Swipe left or right to switch cuisines';
+  var tab=section.tabs[curTabIdx];
+  var items=tab.items();
+  if(section.tabs.length>1){
+    var hint=document.createElement('div');hint.className='swipehint';hint.textContent='Swipe left or right to switch';
     list.appendChild(hint);
   }
-  if(!dishes.length){
+  if(!items.length){
     var empty=document.createElement('p');empty.className='note';empty.style.padding='8px 2px 20px';
-    empty.textContent=cz.label+' recipes are coming soon.';
+    empty.textContent=tab.label+' recipes are coming soon.';
     list.appendChild(empty);
     return;
   }
-  dishes.forEach(function(d){
-    var item={id:d.id,label:recipeLabel(d)};
-    list.appendChild(makeRow({title:item.label,sub:d.v?'Published':'Standard ratio',onClick:function(){recipeBackGoesTo='category';openRecipe(item)}}));
+  items.forEach(function(item){
+    list.appendChild(makeRow({title:item.label,sub:item.sub,onClick:function(){openRecipe(item)}}));
   });
 }
 (function(){
   var sx=0,sy=0,tracking=false;
   var el=$('screenCategory');
   el.addEventListener('touchstart',function(e){
-    if(!(curCat&&curCat.special==='entrees')) {tracking=false;return}
+    if(!(curCat&&curCat.special==='section')) {tracking=false;return}
     tracking=true;sx=e.touches[0].clientX;sy=e.touches[0].clientY;
   },{passive:true});
   el.addEventListener('touchend',function(e){
@@ -1424,8 +1895,9 @@ function renderEntreesCategory(){
     tracking=false;
     var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.5) return;
-    if(dx<0&&curCuisineIdx<CUISINES.length-1){curCuisineIdx++;renderEntreesCategory()}
-    else if(dx>0&&curCuisineIdx>0){curCuisineIdx--;renderEntreesCategory()}
+    var tabs=SECTIONS[curSectionKey].tabs;
+    if(dx<0&&curTabIdx<tabs.length-1){navigate({screen:'section',section:curSectionKey,tab:tabs[curTabIdx+1].key},{replace:true})}
+    else if(dx>0&&curTabIdx>0){navigate({screen:'section',section:curSectionKey,tab:tabs[curTabIdx-1].key},{replace:true})}
   },{passive:true});
 })();
 function renderContinue(){
@@ -1436,7 +1908,7 @@ function renderContinue(){
   row.appendChild(label);
   var list=document.createElement('div');list.className='navlist';
   recents.slice(0,3).forEach(function(r){
-    list.appendChild(makeRow({title:r.label,onClick:function(){recipeBackGoesTo='home';openRecipe(r)}}));
+    list.appendChild(makeRow({title:r.label,onClick:function(){openRecipe(r)}}));
   });
   row.appendChild(list);
 }
@@ -1444,18 +1916,24 @@ function renderHome(){
   var all=allSearchItems();
   $('totalCount').textContent=all.length+' RECIPES';
   var list=$('catList');list.innerHTML='';
+  var filterList=$('filterList');filterList.innerHTML='';
+  var hasFilters=false;
+  // Food-type categories (what the dish IS) and dietary filters (a property
+  // a dish HAS, cutting across every category) are different kinds of
+  // things, so they get separate sections instead of being mixed into one
+  // list as if Gluten-Free were a cuisine the same way Bread or Pies are.
   CATS.forEach(function(cat){
     var n=itemsForCat(cat).length;
-    var sub=(cat.special==='entrees'&&n===0)?'Coming soon':n+' recipe'+(n!==1?'s':'');
-    list.appendChild(makeRow({icon:cat.icon,title:cat.label,sub:sub,onClick:function(){openCategory(cat)}}));
+    var sub=(cat.special==='section'&&n===0)?'Coming soon':n+' recipe'+(n!==1?'s':'');
+    var row=makeRow({icon:cat.icon,title:cat.label,sub:sub,onClick:function(){openCategory(cat)}});
+    if(cat.kind==='filter'){hasFilters=true;filterList.appendChild(row)}
+    else list.appendChild(row);
   });
+  $('filterSection').style.display=hasFilters?'block':'none';
   renderContinue();
 }
-$('catBack').addEventListener('click',function(){renderHome();showScreen('home')});
-$('recipeBack').addEventListener('click',function(){
-  if(recipeBackGoesTo==='category'&&curCat){showScreen('category')}
-  else{renderHome();showScreen('home')}
-});
+$('catBack').addEventListener('click',function(){history.back()});
+$('recipeBack').addEventListener('click',function(){history.back()});
 $('searchInput').addEventListener('input',function(){
   var q=this.value.trim().toLowerCase();
   if(!q){
@@ -1468,7 +1946,7 @@ $('searchInput').addEventListener('input',function(){
   var matches=allSearchItems().filter(function(it){return it.label.toLowerCase().indexOf(q)>-1});
   if(!matches.length){box.innerHTML='<p class="note" style="padding:14px 2px">No matches for "'+this.value.replace(/</g,'')+'".</p>';return}
   matches.forEach(function(it){
-    box.appendChild(makeRow({title:it.label,sub:it.catLabel,onClick:function(){recipeBackGoesTo='home';openRecipe(it)}}));
+    box.appendChild(makeRow({title:it.label,sub:it.catLabel,onClick:function(){openRecipe(it)}}));
   });
 });
 
@@ -1513,9 +1991,12 @@ try{
   if(savedN){lastCount=savedN;countTouched=true}
 }catch(e){$('elev').value='0'}
 
-renderHome();
 updateCartDots();
-showScreen('home');
+// Supports opening the app straight into a specific screen from a shared or
+// bookmarked link (e.g. #/recipe/entree-mongolian-beef). An invalid or
+// missing id just falls through to home rather than erroring.
+if(location.hash&&location.hash!=='#/'){applyRoute(parseHash())}
+else{try{history.replaceState(null,'','#/')}catch(e){} applyRoute({screen:'home'})}
 </script>
 </body>
 </html>
